@@ -1,55 +1,196 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About | kei02003.github.io</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>About — kei02003</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #f5f1ea;
+      --paper: #fbf8f2;
+      --ink: #1c1815;
+      --muted: #76695b;
+      --hairline: #e3dccf;
+      --rust: #b54a1e;
+    }
+
     * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+
     body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Fraunces", Georgia, serif;
+      font-variation-settings: "opsz" 14;
+      font-size: 16px;
       line-height: 1.6;
-      color: #1a1a1a;
-      background: #fff;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
-    .page { max-width: 900px; margin: 0 auto; padding: 40px 24px 64px; }
-    nav {
+
+    a { color: inherit; }
+
+    .wrap {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    header {
+      padding: 26px 0;
+      border-bottom: 1px solid var(--hairline);
+    }
+    header .wrap {
       display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-bottom: 24px;
-      font-size: 0.95rem;
+      justify-content: space-between;
+      align-items: baseline;
     }
-    nav a { color: #1a5c2e; text-decoration: none; font-weight: 600; }
-    nav a:hover { text-decoration: underline; }
-    h1 { margin: 0 0 8px; font-size: 2rem; }
-    p { margin: 0 0 14px; color: #444; }
+    .brand {
+      font-family: "Fraunces", Georgia, serif;
+      font-variation-settings: "opsz" 144, "wght" 500;
+      font-size: 19px;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+      color: var(--ink);
+    }
+    .brand em {
+      font-style: italic;
+      font-variation-settings: "opsz" 144, "wght" 400;
+      color: var(--muted);
+      margin-left: 6px;
+    }
+    nav {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11.5px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    nav a + a { margin-left: 28px; }
+    nav a:hover { color: var(--rust); }
+    nav a[aria-current] { color: var(--ink); }
+
+    main {
+      padding: 96px 0 128px;
+    }
+    .eyebrow {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 28px;
+    }
+    h1 {
+      font-variation-settings: "opsz" 144, "wght" 380;
+      font-size: clamp(36px, 5vw, 58px);
+      line-height: 1.05;
+      letter-spacing: -0.025em;
+      margin: 0 0 24px;
+      max-width: 720px;
+    }
+    .intro,
+    .body-copy {
+      max-width: 720px;
+      color: var(--muted);
+    }
+    .intro {
+      font-size: 19px;
+      margin: 0 0 36px;
+    }
+    .body-copy p {
+      margin: 0 0 16px;
+    }
     .callout {
-      border: 1px solid #e8e8e8;
-      border-left: 4px solid #2d7a3a;
-      border-radius: 8px;
-      padding: 14px 16px;
-      background: #f7f7f7;
-      margin-top: 18px;
+      margin-top: 42px;
+      max-width: 720px;
+      padding: 18px 20px;
+      border: 1px solid var(--hairline);
+      background: var(--paper);
+    }
+    .callout strong {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    footer {
+      padding: 36px 0 56px;
+      border-top: 1px solid var(--hairline);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+    footer .wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    footer .links a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+    footer .links a + a { margin-left: 24px; }
+    footer .links a:hover { color: var(--rust); }
+
+    @media (max-width: 600px) {
+      .wrap { padding: 0 20px; }
+      main { padding: 72px 0 88px; }
+      nav a + a { margin-left: 16px; }
+      footer .links a + a { margin-left: 16px; }
     }
   </style>
 </head>
 <body>
-  <div class="page">
-    <nav aria-label="Site navigation">
-      <a href="/">Home</a>
-      <a href="/about.html">About</a>
-      <a href="/projects/">Projects</a>
-    </nav>
-
-    <h1>About</h1>
-    <p>This is a scaffolded standalone page to demonstrate path-based routing with GitHub Pages.</p>
-    <p>You can replace this content with your bio, site purpose, or contact details.</p>
-
-    <div class="callout">
-      URL for this page: <strong>/about.html</strong>
+  <header>
+    <div class="wrap">
+      <a class="brand" href="/">kei02003 <em>index</em></a>
+      <nav aria-label="Site navigation">
+        <a href="/">Home</a>
+        <a href="/projects/">Projects</a>
+        <a href="/about.html" aria-current="page">About</a>
+      </nav>
     </div>
-  </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <p class="eyebrow">No. 03 / About</p>
+      <h1>Short notes on the person behind the prototypes.</h1>
+      <p class="intro">This page now uses the same site navigation and visual language as the rest of the portfolio, so moving between sections is consistent.</p>
+
+      <div class="body-copy">
+        <p>This site is a small archive for experiments, product thinking, and in-progress ideas.</p>
+        <p>As new project pages are published, they can be added to the archive without introducing dead-end links in the main navigation.</p>
+      </div>
+
+      <div class="callout">
+        <strong>Current route</strong>
+        <p>/about.html</p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>© 2026 · kei02003</span>
+      <div class="links">
+        <a href="https://github.com/kei02003">GitHub</a>
+        <a href="/projects/">Projects</a>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>
