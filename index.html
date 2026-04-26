@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PM Workflow — Moving to L3, Building to L4</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-dark:  #1a5c2e;
+    --green-mid:   #2d7a3a;
+    --green-light: #e8f5eb;
+    --olive:       #7a6b1a;
+    --olive-light: #f5f2e0;
+    --red-mid:     #b04020;
+    --red-light:   #fdf0ec;
+    --gray-100:    #f7f7f7;
+    --gray-200:    #e8e8e8;
+    --gray-500:    #888;
+    --gray-700:    #444;
+    --gray-900:    #1a1a1a;
+    --accent:      #2d7a3a;
+    --text:        #1a1a1a;
+    --radius:      8px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text);
+    background: #fff;
+    line-height: 1.6;
+  }
+
+  /* ── Layout ── */
+  .page { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+  section { padding: 64px 0; border-bottom: 1px solid var(--gray-200); }
+  section:last-child { border-bottom: none; }
+
+  h1 { font-size: 2.2rem; font-weight: 700; line-height: 1.2; }
+  h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+  h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 6px; }
+  p  { color: var(--gray-700); margin-bottom: 12px; }
+  p:last-child { margin-bottom: 0; }
+
+  .label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    margin-bottom: 36px;
+  }
+  .section-title .label { margin-bottom: 6px; }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 72px 0 56px;
+    background: var(--gray-100);
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .hero .page { display: flex; flex-direction: column; gap: 20px; }
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--green-light);
+    color: var(--green-dark);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    width: fit-content;
+  }
+  .hero-eyebrow .dot {
+    width: 8px; height: 8px;
+    background: var(--green-mid);
+    border-radius: 50%;
+  }
+  .hero h1 { max-width: 620px; }
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--gray-700);
+    max-width: 560px;
+  }
+  .hero-meta {
+    font-size: 0.85rem;
+    color: var(--gray-500);
+    margin-top: 8px;
+  }
+
+  /* ── Maturity Ladder ── */
+  .ladder { display: flex; flex-direction: column; gap: 6px; }
+  .rung {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 20px;
+    border-radius: var(--radius);
+    border: 2px solid transparent;
+    transition: opacity 0.2s;
+  }
+  .rung.dimmed { opacity: 0.38; }
+  .rung.current {
+    border-color: var(--green-mid);
+    box-shadow: 0 0 0 4px rgba(45,122,58,0.10);
+  }
+  .rung.target {
+    border-color: var(--green-dark);
+    box-shadow: 0 0 0 4px rgba(26,92,46,0.13);
+  }
+  .rung-badge {
+    min-width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .rung-body { flex: 1; }
+  .rung-name { font-weight: 700; font-size: 0.95rem; }
+  .rung-desc { font-size: 0.85rem; color: var(--gray-700); margin-top: 1px; }
+  .rung-tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .tag-current { background: var(--olive-light); color: var(--olive); }
+  .tag-target  { background: var(--green-light); color: var(--green-dark); }
+
+  /* ── Timeline ── */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .time-block {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 0 24px;
+    position: relative;
+  }
+  .time-block:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 139px;
+    top: 52px;
+    bottom: -1px;
+    width: 2px;
+    background: var(--gray-200);
+  }
+  .time-left {
+    padding: 20px 0;
+    text-align: right;
+    position: relative;
+  }
+  .time-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--gray-500);
+  }
+  .time-duration {
+    font-size: 0.8rem;
+    color: var(--gray-500);
+    margin-top: 2px;
+  }
+  .time-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--green-mid);
+    position: absolute;
+    right: -30px;
+    top: 26px;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px var(--green-mid);
+  }
+  .time-right {
+    padding: 16px 0 28px 16px;
+    border-left: 2px solid transparent;
+  }
+  .time-block:first-child .time-right { padding-top: 20px; }
+  .time-block.active-block .time-right {
+    border-left-color: var(--green-mid);
+    padding-left: 20px;
+    margin-left: -4px;
+  }
+  .time-block.passive-block .time-dot { background: var(--gray-300); box-shadow: 0 0 0 2px var(--gray-300); }
+  .time-block.passive-block .time-right { opacity: 0.7; }
+  .time-heading { font-weight: 700; font-size: 1rem; margin-bottom: 10px; }
+  .step-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .step-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: var(--gray-700);
+  }
+  .step-list li .cmd {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.78rem;
+    background: var(--gray-100);
+    color: var(--green-dark);
+    border: 1px solid var(--gray-200);
+    padding: 2px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .step-list li .cmd.new { background: var(--green-light); border-color: #b8dbbe; }
+  .step-arrow { color: var(--gray-500); font-size: 0.85rem; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Work item cards ── */
+  .cards-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .wi-card {
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .wi-card-header {
+    padding: 14px 16px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .wi-icon {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+  .wi-card-body { padding: 0 16px 16px; }
+  .wi-card-body p { font-size: 0.85rem; margin-bottom: 12px; }
+  .wi-field {
+    font-size: 0.78rem;
+    color: var(--gray-700);
+    padding: 4px 0;
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    gap: 6px;
+  }
+  .wi-field strong { color: var(--gray-900); min-width: 64px; flex-shrink: 0; }
+
+  /* ── Commands ── */
+  .commands { display: flex; flex-direction: column; gap: 16px; }
+  .cmd-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 20px;
+    align-items: start;
+    padding: 20px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius);
+    background: var(--gray-100);
+  }
+  .cmd-row:hover { border-color: var(--green-mid); background: var(--green-light); }
+  .cmd-left {}
+  .cmd-name {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--green-dark);
+  }
+  .cmd-who {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    margin-top: 4px;
+  }
+  .cmd-right h3 { font-size: 0.92rem; margin-bottom: 4px; }
+  .cmd-right p  { font-size: 0.85rem; }
+  .cmd-io {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .io-row {
+    font-size: 0.78rem;
+    display: flex;
+    gap: 8px;
+    color: var(--gray-700);
+  }
+  .io-row strong { color: var(--gray-900); min-width: 44px; }
+
+  /* ── Before / After ── */
+  .ba-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .ba-table th {
+    text-align: left;
+    padding: 10px 16px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--gray-500);
+    border-bottom: 2px solid var(--gray-200);
+  }
+  .ba-table td {
+    padding: 12px 16px;
+    vertical-align: top;
+    border-bottom: 1px solid var(--gray-200);
+    color: var(--gray-700);
+  }
+  .ba-table tr:last-child td { border-bottom: none; }
+  .ba-table .col-now  { color: var(--red-mid); }
+  .ba-table .col-mid  { color: var(--olive); font-weight: 500; }
+  .ba-table .col-then { color: var(--gray-500); }
+
+  /* ── Metrics ── */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .metric-card {
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .metric-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
+  .metric-source { font-size: 0.78rem; color: var(--gray-500); margin-bottom: 14px; }
+  .metric-bars { display: flex; flex-direction: column; gap: 8px; }
+  .metric-bar-row { display: flex; align-items: center; gap: 10px; }
+  .metric-bar-label { font-size: 0.78rem; color: var(--gray-700); min-width: 28px; font-weight: 600; }
+  .metric-bar-track {
+    flex: 1; height: 8px;
+    background: var(--gray-200);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .metric-bar-fill { height: 100%; border-radius: 4px; }
+  .metric-bar-value { font-size: 0.78rem; color: var(--gray-500); min-width: 80px; text-align: right; }
+
+  /* ── Footer ── */
+  .footer {
+    padding: 40px 0;
+    text-align: center;
+    color: var(--gray-500);
+    font-size: 0.82rem;
+    border-top: 1px solid var(--gray-200);
+  }
+
+  @media print {
+    .hero { background: #fff; }
+    section { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Hero ── -->
+<div class="hero">
+  <div class="page">
+    <div class="hero-eyebrow">
+      <span class="dot"></span>
+      Agentic Development Transition
+    </div>
+    <h1>The PM Workflow: Moving to L3, Building to L4</h1>
+    <p class="hero-sub">
+      A two-phase transition. L3 starts now — agents build, PMs review at the feature level.
+      L4 follows when foundations are in place — structured acceptance reports replace manual review.
+    </p>
+    <p class="hero-meta">2026-04-26 &nbsp;·&nbsp; Internal design document</p>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- ── 1. Maturity Ladder ── -->
+<section>
+  <div class="section-title">
+    <div class="label">Where we're going</div>
+    <h2>The 5 Levels of Agentic Development</h2>
+    <p>We're moving from Level 2 to Level 4. Each level changes what humans review and how much AI is involved.</p>
+  </div>
+
+  <div class="ladder">
+
+    <div class="rung dimmed" style="background:#f0f7f1;">
+      <div class="rung-badge" style="background:#1a5c2e;">L5</div>
+      <div class="rung-body">
+        <div class="rung-name">The Flywheel</div>
+        <div class="rung-desc">Intent in, software out. Fully autonomous development.</div>
+      </div>
+    </div>
+
+    <div class="rung target" style="background:#e8f5eb;">
+      <div class="rung-badge" style="background:#2d7a3a;">L4</div>
+      <div class="rung-body">
+        <div class="rung-name">Product Engineer</div>
+        <div class="rung-desc">Pass spec to agents. Review product outcomes. Code is skimmed, not read.</div>
+      </div>
+      <div class="rung-tag" style="background:#f0f4e8;color:#5a6b1a;font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:3px 9px;border-radius:20px;white-space:nowrap;">Phase 2</div>
+    </div>
+
+    <div class="rung target" style="background:#f5f2e0;border-color:#7a6b1a;box-shadow:0 0 0 4px rgba(122,107,26,0.12);">
+      <div class="rung-badge" style="background:#7a6b1a;">L3</div>
+      <div class="rung-body">
+        <div class="rung-name">Developer as Manager</div>
+        <div class="rung-desc">Human defines spec, AI builds. Review happens at the feature and PR level.</div>
+      </div>
+      <div class="rung-tag tag-target">Our target</div>
+    </div>
+
+    <div class="rung current" style="background:#fdf0ec;">
+      <div class="rung-badge" style="background:#b04020;">L2</div>
+      <div class="rung-body">
+        <div class="rung-name">AI as Junior Developer</div>
+        <div class="rung-desc">AI builds across files. Humans review all code as it is produced.</div>
+      </div>
+      <div class="rung-tag tag-current">We are here</div>
+    </div>
+
+    <div class="rung dimmed" style="background:#fdf0ec;">
+      <div class="rung-badge" style="background:#9c2e1e;">L1</div>
+      <div class="rung-body">
+        <div class="rung-name">AI as Coding Intern</div>
+        <div class="rung-desc">AI handles scoped tasks. Human reviews output and owns architecture.</div>
+      </div>
+    </div>
+
+    <div class="rung dimmed" style="background:#fdf0ec;">
+      <div class="rung-badge" style="background:#7a1e1e;">L0</div>
+      <div class="rung-body">
+        <div class="rung-name">Spicy Autocomplete</div>
+        <div class="rung-desc">AI suggests the next line. Human is still writing all the software.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── 2. Role Matrix ── -->
+<section>
+  <div class="section-title">
+    <div class="label">Who does what</div>
+    <h2>What Each Role Reviews at Each Level</h2>
+    <p>At each level, the artifact each role reviews changes. The work shifts upstream toward intent and downstream toward outcomes.</p>
+  </div>
+
+  <div style="overflow-x:auto;">
+  <table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
+    <thead>
+      <tr>
+        <th style="width:80px;padding:10px 14px;text-align:left;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#888;border-bottom:2px solid #e8e8e8;"></th>
+        <th style="padding:10px 14px;text-align:left;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#888;border-bottom:2px solid #e8e8e8;">
+          <span style="display:inline-flex;align-items:center;gap:6px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#2d7a3a;display:inline-block;"></span>
+            Product (PM)
+          </span>
+        </th>
+        <th style="padding:10px 14px;text-align:left;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#888;border-bottom:2px solid #e8e8e8;">
+          <span style="display:inline-flex;align-items:center;gap:6px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#3a5cc4;display:inline-block;"></span>
+            Development
+          </span>
+        </th>
+        <th style="padding:10px 14px;text-align:left;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#888;border-bottom:2px solid #e8e8e8;">
+          <span style="display:inline-flex;align-items:center;gap:6px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#8b4faf;display:inline-block;"></span>
+            QA
+          </span>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- L2 -->
+      <tr style="background:#fdf0ec;">
+        <td style="padding:16px 14px;vertical-align:top;border-bottom:1px solid #e8e8e8;">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:6px;background:#b04020;color:#fff;font-size:0.75rem;font-weight:800;">L2</span>
+          <div style="font-size:0.7rem;color:#b04020;font-weight:700;margin-top:5px;text-transform:uppercase;letter-spacing:.05em;">Now</div>
+        </td>
+        <td style="padding:16px 14px;vertical-align:top;border-bottom:1px solid #e8e8e8;color:#444;">
+          Writes user stories in ADO. Does manual acceptance testing by clicking through the product. Reviews PRs or asks devs for walkthroughs.
+        </td>
+        <td style="padding:16px 14px;vertical-align:top;border-bottom:1px solid #e8e8e8;color:#444;">
+          Reviews every line of agent-generated code as it is produced. Owns architecture decisions entirely.
+        </td>
+        <td style="padding:16px 14px;vertical-align:top;border-bottom:1px solid #e8e8e8;color:#444;">
+          Runs test suites manually. Triages every failure individually. Writes tests after implementation.
+        </td>
+      </tr>
+
+      <!-- Arrow row -->
+      <tr>
+        <td colspan="4" style="padding:6px 14px;text-align:center;font-size:0.78rem;color:#aaa;border-bottom:1px solid #e8e8e8;letter-spacing:.05em;">
+          ▼ &nbsp; L3 — Developer as Manager &nbsp; ▼
+        </td>
+      </tr>
+
+      <!-- L3 -->
+      <tr style="background:#f5f2e0;">
+        <td style="padding:16px 14px;vertical-align:top;border-bottom:1px solid #e8e8e8;">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:6px;background:#7a6b1a;color:#fff;font-size:0.75rem;font-weight:800;">L3</span>
+          <div style="font-size:0.7rem;color:#7a6b1a;font-weight:700;margin-top:5px;text-transform:uppercase;letter-spacing:.05em;">Step 1</div>
+        </td>
+        <td style="padding:16px 14px;vertical-align:top;border-bottom:1px solid #e8e8e8;color:#444;">
+          Reviews at the <strong>feature level</strong> — did it ship? does it solve the problem? No longer reviews every ticket or PR diff.
+        </td>
+        <td style="padding:16px 14px;vertical-align:top;border-bottom:1px solid #e8e8e8;color:#444;">
+          Reviews at the <strong>PR level</strong> — reads the diff and test results instead of every individual commit. Spot-checks architecture.
+        </td>
+        <td style="padding:16px 14px;vertical-align:top;border-bottom:1px solid #e8e8e8;color:#444;">
+          Reviews <strong>automated test results</strong> per feature. Triages suite-level failures vs individual test runs.
+        </td>
+      </tr>
+
+      <!-- Arrow row -->
+      <tr>
+        <td colspan="4" style="padding:6px 14px;text-align:center;font-size:0.78rem;color:#aaa;border-bottom:1px solid #e8e8e8;letter-spacing:.05em;">
+          ▼ &nbsp; L4 — Product Engineer &nbsp; ▼
+        </td>
+      </tr>
+
+      <!-- L4 -->
+      <tr style="background:#e8f5eb;">
+        <td style="padding:16px 14px;vertical-align:top;">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:6px;background:#2d7a3a;color:#fff;font-size:0.75rem;font-weight:800;">L4</span>
+          <div style="font-size:0.7rem;color:#2d7a3a;font-weight:700;margin-top:5px;text-transform:uppercase;letter-spacing:.05em;">Target</div>
+        </td>
+        <td style="padding:16px 14px;vertical-align:top;color:#1a1a1a;">
+          Reviews <strong>acceptance verdicts</strong> — did each AC pass? Reads the report vs reading the code. Approves or triages failures by likely cause.
+        </td>
+        <td style="padding:16px 14px;vertical-align:top;color:#1a1a1a;">
+          Reviews <strong>architecture drift</strong> vs implementation. Maintains the test harness and handles agent escapes. Shifts toward platform reliability.
+        </td>
+        <td style="padding:16px 14px;vertical-align:top;color:#1a1a1a;">
+          Writes <strong>acceptance criteria and edge-case tests</strong> at spec time. Reviews AC coverage gaps and failure pattern trends. Doesn't need to review individual runs.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ── 3. Before / After (PM only) ── -->
+<section>
+  <div class="section-title">
+    <div class="label">What changes</div>
+    <h2>The PM Role, Before and After</h2>
+    <p>L3 is the immediate target. L4 follows once eval infrastructure and acceptance tooling are in place.</p>
+  </div>
+
+  <table class="ba-table">
+    <thead>
+      <tr>
+        <th>Activity</th>
+        <th>
+          <span style="display:inline-flex;align-items:center;gap:6px;">
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;background:#b04020;color:#fff;font-size:9px;font-weight:800;">L2</span>
+            Today
+          </span>
+        </th>
+        <th style="background:#fafff8;">
+          <span style="display:inline-flex;align-items:center;gap:6px;">
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;background:#7a6b1a;color:#fff;font-size:9px;font-weight:800;">L3</span>
+            Our target — now
+          </span>
+        </th>
+        <th style="color:var(--gray-500);">
+          <span style="display:inline-flex;align-items:center;gap:6px;">
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;background:#aaa;color:#fff;font-size:9px;font-weight:800;">L4</span>
+            Phase 2 — future
+          </span>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Writing requirements</strong></td>
+        <td class="col-now">User stories written directly in ADO by hand</td>
+        <td class="col-mid">PMs can use natural language plus a user story agent to generate ACs </td>
+        <td class="col-then">AC auto-generated into markdown spec files and translated to agent-friendly format. PM approves the translation</td>
+      </tr>
+      <tr>
+        <td><strong>Acceptance testing</strong></td>
+        <td class="col-now">PM clicks through the product manually after every story</td>
+        <td class="col-mid">PM reviews feature demo and PR description; spot-checks a few ACs manually</td>
+        <td class="col-then">PM gets an acceptance report in their inbox: each AC either passed or failed, with evidence</td>
+      </tr>
+      <tr>
+        <td><strong>Code review</strong></td>
+        <td class="col-now">PM reviews PR diffs or asks dev for a walkthrough</td>
+        <td class="col-mid">PM skims PR description and test results; rarely reads diffs directly</td>
+        <td class="col-then">PM reviews AC verdicts and product outcomes. Code is not part of the review</td>
+      </tr>
+      <tr>
+        <td><strong>Status updates</strong></td>
+        <td class="col-now">"What are you working on?" in standup</td>
+        <td class="col-mid">ADO task progress visible; standup still happens but is shorter</td>
+        <td class="col-then">ADO comments automatically arrive as tasks progress </td>
+      </tr>
+      <tr>
+        <td><strong>Requesting changes</strong></td>
+        <td class="col-now">Leave a comment in ADO or the PR</td>
+        <td class="col-mid">Comment in ADO; agent may rerun if configured, but not guaranteed</td>
+        <td class="col-then">The agent autommatically re-runs against the updated criteria via a trigger such as an updated spec doc</td>
+      </tr>
+      <tr>
+        <td><strong>Release notes</strong></td>
+        <td class="col-now">Written manually from memory or ticket history</td>
+        <td class="col-mid">Assembled from closed ADO items; mostly manual with some copying</td>
+        <td class="col-then">Auto-generated from acceptance reports at the end of each sprint</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ── 3a. Day at L3 ── -->
+<section>
+  <div class="section-title">
+    <div class="label">Day in the life — Starting now</div>
+    <h2>A PM's Day at Level 3</h2>
+    <p>Agents do the building; PMs review at the feature level. Manual acceptance testing shrinks significantly.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+
+    <div style="border:1.5px solid var(--gray-200);border-radius:var(--radius);overflow:hidden;">
+      <div style="background:var(--olive);height:5px;"></div>
+      <div style="padding:16px;">
+        <div style="font-weight:700;font-size:0.95rem;margin-bottom:4px;">Morning</div>
+        <div style="font-size:0.78rem;color:var(--gray-500);margin-bottom:12px;">~45 min · active</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:0.85rem;color:var(--gray-700);">
+          <li>→ Write stories by hand in ADO, or describe in natural language and let a user story agent generate the ACs</li>
+          <li>→ Check what agents completed overnight</li>
+          <li>→ Review feature demos or PR descriptions for completed work</li>
+          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="font-family:monospace;font-size:0.75rem;background:var(--gray-100);border:1px solid var(--gray-200);padding:2px 6px;border-radius:4px;white-space:nowrap;">/spec-to-issues</span> Create ADO items</li>
+          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="font-family:monospace;font-size:0.75rem;background:var(--gray-100);border:1px solid var(--gray-200);padding:2px 6px;border-radius:4px;white-space:nowrap;">/kickoff</span> Agents start</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="border:1.5px solid var(--gray-200);border-radius:var(--radius);overflow:hidden;">
+      <div style="background:var(--gray-200);height:5px;"></div>
+      <div style="padding:16px;opacity:0.75;">
+        <div style="font-weight:700;font-size:0.95rem;margin-bottom:4px;">Midday</div>
+        <div style="font-size:0.78rem;color:var(--gray-500);margin-bottom:12px;">passive</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:0.85rem;color:var(--gray-700);">
+          <li>→ Stakeholder calls, roadmap work</li>
+          <li>→ ADO task progress visible on demand</li>
+          <li>→ Occasional standup check-in still happens</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="border:1.5px solid var(--gray-200);border-radius:var(--radius);overflow:hidden;">
+      <div style="background:var(--olive);height:5px;"></div>
+      <div style="padding:16px;">
+        <div style="font-weight:700;font-size:0.95rem;margin-bottom:4px;">Afternoon</div>
+        <div style="font-size:0.78rem;color:var(--gray-500);margin-bottom:12px;">~45 min · active</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:0.85rem;color:var(--gray-700);">
+          <li>→ Review PR descriptions and test results for completed features</li>
+          <li>→ Spot-check a few ACs manually in the product</li>
+          <li>→ Approve or request changes via ADO comment</li>
+          <li>→ Agent may rerun if configured — but not guaranteed</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="border:1.5px solid var(--gray-200);border-radius:var(--radius);overflow:hidden;">
+      <div style="background:var(--olive);height:5px;"></div>
+      <div style="padding:16px;">
+        <div style="font-weight:700;font-size:0.95rem;margin-bottom:4px;">End of day</div>
+        <div style="font-size:0.78rem;color:var(--gray-500);margin-bottom:12px;">~20 min · active</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:0.85rem;color:var(--gray-700);">
+          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="font-family:monospace;font-size:0.75rem;background:var(--gray-100);border:1px solid var(--gray-200);padding:2px 6px;border-radius:4px;white-space:nowrap;">/sprint-report</span> Draft sprint summary from closed ADO items — PM reviews and fills gaps</li>
+          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="font-family:monospace;font-size:0.75rem;background:var(--gray-100);border:1px solid var(--gray-200);padding:2px 6px;border-radius:4px;white-space:nowrap;">/plan-sprints</span> Check backlog</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- L3 → L4 upgrade callout -->
+  <div style="margin-top:24px;padding:18px 20px;background:var(--gray-100);border-radius:var(--radius);border-left:4px solid var(--gray-200);">
+    <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-500);margin-bottom:6px;">When you're ready for Phase 2</div>
+    <div style="font-size:0.9rem;color:var(--gray-700);">
+      Two things change when we move to L4. First, ACs get formally translated before work starts, removing the ambiguity that makes manual spot-checking necessary.
+      Second, <code style="font-size:0.82rem;background:rgba(0,0,0,0.06);padding:1px 5px;border-radius:3px;">/accept</code> generates a structured verdict for every AC, so the PM reads a report instead of reviewing the feature manually.
+      Everything else — writing specs, kicking off agents, reviewing sprint health — carries over unchanged.
+    </div>
+  </div>
+</section>
+
+<!-- ── 3b. Day at L4 ── -->
+<section>
+  <div style="display:inline-flex;align-items:center;gap:8px;background:#f0f0f0;border-radius:20px;padding:5px 14px;margin-bottom:24px;">
+    <span style="width:8px;height:8px;border-radius:50%;background:#aaa;display:inline-block;"></span>
+    <span style="font-size:0.78rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.07em;">Phase 2 — future</span>
+  </div>
+  <div class="section-title">
+    <div class="label">Day in the life — Level 4</div>
+    <h2>A PM's Day at Level 4</h2>
+    <p>This is where we're heading after L3 foundations are in place. Active PM time stays the same but afternoon review shifts from feature demos to reading acceptance reports.</p>
+  </div>
+
+  <div class="timeline">
+
+    <div class="time-block active-block">
+      <div class="time-left">
+        <div class="time-label">Morning</div>
+        <div class="time-duration">~1 hour · active</div>
+        <div class="time-dot"></div>
+      </div>
+      <div class="time-right">
+        <div class="time-heading">Write specs &amp; check overnight results</div>
+        <ul class="step-list">
+          <li><span class="step-arrow">→</span> Check ADO comments — see acceptance reports from last night's agent runs</li>
+          <li><span class="step-arrow">→</span> Triage any failures: revise spec, flag to dev, or accept as-is</li>
+          <li><span class="step-arrow">→</span> Describe the feature in natural language — ACs are auto-generated into a markdown spec file</li>
+          <li><span class="cmd new">/validate-spec</span> <span>Review auto-generated ACs, approve or edit, agent cannot start until approved</span></li>
+          <li><span class="cmd">/spec-to-issues</span> <span>Create ADO work items from the spec</span></li>
+          <li><span class="cmd">/kickoff</span> <span>Agents pick up tasks and start building</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="time-block passive-block">
+      <div class="time-left">
+        <div class="time-label">Midday</div>
+        <div class="time-duration">passive</div>
+        <div class="time-dot" style="background:#ccc;box-shadow:0 0 0 2px #ccc;"></div>
+      </div>
+      <div class="time-right">
+        <div class="time-heading">Agents build — PM does other work</div>
+        <ul class="step-list">
+          <li><span class="step-arrow">→</span> Stakeholder calls, roadmap planning, user research</li>
+          <li><span class="step-arrow">→</span> ADO task-progress comments arrive automatically</li>
+          <li><span class="cmd">/status</span> <span>Quick health check if needed — task progress, test results</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="time-block active-block">
+      <div class="time-left">
+        <div class="time-label">Afternoon</div>
+        <div class="time-duration">~30 min · active</div>
+        <div class="time-dot"></div>
+      </div>
+      <div class="time-right">
+        <div class="time-heading">Review acceptance reports</div>
+        <ul class="step-list">
+          <li><span class="step-arrow">→</span> Acceptance report arrives in inbox — each AC passed or failed, with evidence</li>
+          <li><span class="step-arrow">→</span> All ACs pass → click Approve in ADO, feature ships</li>
+          <li><span class="step-arrow">→</span> Some ACs fail → read "likely cause", choose action:</li>
+          <li style="padding-left:20px;"><span class="step-arrow">·</span> Ambiguous AC → revise spec, agent reruns</li>
+          <li style="padding-left:20px;"><span class="step-arrow">·</span> Implementation gap → comment gets approved in ADO, agent re-runs against that AC</li>
+          <li style="padding-left:20px;"><span class="step-arrow">·</span> Technical blocker → tag a dev in ADO</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="time-block active-block">
+      <div class="time-left">
+        <div class="time-label">End of day</div>
+        <div class="time-duration">~15 min · active</div>
+        <div class="time-dot"></div>
+      </div>
+      <div class="time-right">
+        <div class="time-heading">Sprint health &amp; stakeholder update</div>
+        <ul class="step-list">
+          <li><span class="cmd new">/sprint-report</span> <span>Auto-generated from acceptance reports — fully automated at L4, no gap-filling needed</span></li>
+          <li><span class="cmd">/plan-sprints</span> <span>Check remaining backlog vs. agent velocity, adjust priorities</span></li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── 4. Work Item Types ── -->
+<section>
+  <div class="section-title">
+    <div class="label">What you write</div>
+    <h2>Three Types of Work Items</h2>
+    <p>Each type has its own spec format and command pair. Bugs can be filed by anyone.</p>
+  </div>
+
+  <div class="cards-3">
+
+    <div class="wi-card">
+      <div class="wi-card-header" style="background:#e8f5eb;">
+        <div class="wi-icon" style="background:#2d7a3a; color:#fff;">&#9654;</div>
+        <h3>Feature</h3>
+      </div>
+      <div class="wi-card-body">
+        <p>Multi-story work with a defined goal. Full spec with user stories and acceptance criteria.</p>
+        <div class="wi-field"><strong>Author</strong> PM</div>
+        <div class="wi-field"><strong>File</strong> docs/specs/…feature.md</div>
+        <div class="wi-field"><strong>Commands</strong> /validate-spec → /accept</div>
+        <div class="wi-field"><strong>ACs</strong> Natural language, translated to verifiable form</div>
+      </div>
+    </div>
+
+    <div class="wi-card">
+      <div class="wi-card-header" style="background:#f0f4ff;">
+        <div class="wi-icon" style="background:#3a5cc4; color:#fff;">&#9632;</div>
+        <h3>User Story</h3>
+      </div>
+      <div class="wi-card-body">
+        <p>A single scoped behavior. Lightweight with one goal, 1–3 acceptance criteria.</p>
+        <div class="wi-field"><strong>Author</strong> PM</div>
+        <div class="wi-field"><strong>File</strong> docs/specs/…story.md</div>
+        <div class="wi-field"><strong>Commands</strong> /validate-spec --story → /accept</div>
+        <div class="wi-field"><strong>ACs</strong> Same format, lighter validation</div>
+      </div>
+    </div>
+
+    <div class="wi-card">
+      <div class="wi-card-header" style="background:#fdf0ec;">
+        <div class="wi-icon" style="background:#b04020; color:#fff;">&#9675;</div>
+        <h3>Bug</h3>
+      </div>
+      <div class="wi-card-body">
+        <p>A reproduction case + expected vs. actual behavior. No acceptance criteria other than the bug no longer reproduces.</p>
+        <div class="wi-field"><strong>Author</strong> Anyone</div>
+        <div class="wi-field"><strong>File</strong> docs/bugs/…bug.md</div>
+        <div class="wi-field"><strong>Commands</strong> /bug-report → /verify-fix</div>
+        <div class="wi-field"><strong>ACs</strong> Implicit: repro no longer reproduces</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── 5. Commands ── -->
+<section>
+  <div class="section-title">
+    <div class="label">New tools</div>
+    <h2>Examples of New Commands</h2>
+    <p>All global (available in any project). </p>
+  </div>
+
+  <!-- L3 commands -->
+  <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--olive);margin-bottom:12px;">Available at L3 — now</div>
+  <div class="commands" style="margin-bottom:32px;">
+
+    <div class="cmd-row">
+      <div class="cmd-left">
+        <div class="cmd-name">/bug-report</div>
+        <div class="cmd-who">Run by: anyone</div>
+      </div>
+      <div class="cmd-right">
+        <h3>File a validated bug and create the ADO work item</h3>
+        <p>Checks that the bug report has all required fields (steps to reproduce, actual vs. expected, severity). Creates the ADO Bug work item and writes the ID back to the file.</p>
+        <div class="cmd-io">
+          <div class="io-row"><strong>In:</strong> Bug report file</div>
+          <div class="io-row"><strong>Out:</strong> ADO Bug work item created</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-row">
+      <div class="cmd-left">
+        <div class="cmd-name">/verify-fix</div>
+        <div class="cmd-who">Run by: dev or agent after fix</div>
+      </div>
+      <div class="cmd-right">
+        <h3>Confirm a bug no longer reproduces before merging</h3>
+        <p>Attempts to reproduce the bug against the current branch. Checks that a regression test was added. Reports VERIFIED or UNVERIFIED — a fix without a regression test is not accepted.</p>
+        <div class="cmd-io">
+          <div class="io-row"><strong>In:</strong> Bug report file + current branch</div>
+          <div class="io-row"><strong>Out:</strong> Verification report in ADO + docs/acceptance/</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-row">
+      <div class="cmd-left">
+        <div class="cmd-name">/sprint-report</div>
+        <div class="cmd-who">Run by: PM</div>
+      </div>
+      <div class="cmd-right">
+        <h3>Generate a stakeholder-ready sprint summary</h3>
+        <p>Reads all completed work items and acceptance reports from the sprint window. Produces a plain-English summary of what shipped, what was blocked, and quality health metrics. When escape records use a standardized failure category schema, blocked items are grouped by pattern ("2 auth failures, 1 tool failure") rather than listed individually.</p>
+        <div class="cmd-io">
+          <div class="io-row"><strong>In:</strong> Sprint window (defaults to last 14 days)</div>
+          <div class="io-row"><strong>Out:</strong> Summary doc + running metrics log</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- L4 commands -->
+  <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-500);margin-bottom:12px;">Unlock L4 — Phase 2</div>
+  <div class="commands" style="opacity:0.72;">
+
+    <div class="cmd-row" style="border-color:var(--gray-200);background:var(--gray-100);">
+      <div class="cmd-left">
+        <div class="cmd-name" style="color:var(--gray-500);">/validate-spec</div>
+        <div class="cmd-who">Run by: PM</div>
+      </div>
+      <div class="cmd-right">
+        <h3>Translate acceptance criteria before agents start</h3>
+        <p>Reads each natural-language AC and converts it to a specific, testable assertion. Shows a side-by-side. PM approves or edits each one. Agents cannot start until every AC is approved. This is the gate that makes structured acceptance review possible.</p>
+        <div class="cmd-io">
+          <div class="io-row"><strong>In:</strong> Your spec file</div>
+          <div class="io-row"><strong>Out:</strong> Spec updated with verified ACs + approval timestamp</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmd-row" style="border-color:var(--gray-200);background:var(--gray-100);">
+      <div class="cmd-left">
+        <div class="cmd-name" style="color:var(--gray-500);">/accept</div>
+        <div class="cmd-who">Run by: dev or agent after PR</div>
+      </div>
+      <div class="cmd-right">
+        <h3>Generate an acceptance report for PM review</h3>
+        <p>Uses an LLM-as-judge to evaluate each verified AC against what was built — scores each as pass or fail with evidence. Posts a structured report as an ADO comment so the PM can approve without reviewing the PR.</p>
+        <div class="cmd-io">
+          <div class="io-row"><strong>In:</strong> Spec file + current branch</div>
+          <div class="io-row"><strong>Out:</strong> Acceptance report in ADO + docs/acceptance/</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── 6. Graduation Metrics ── -->
+<section>
+  <div class="section-title">
+    <div class="label">How we know we're there</div>
+    <h2>Graduation Metrics</h2>
+    <p>L3 thresholds are the immediate target. When we sustain them for two consecutive sprints, we've graduated to L3. L4 thresholds follow once Phase 2 tooling is in place.</p>
+  </div>
+
+  <div class="metrics-grid">
+
+    <div class="metric-card">
+      <div class="metric-name">AC Pass Rate</div>
+      <div class="metric-source">Source: acceptance reports in docs/acceptance/</div>
+      <div class="metric-bars">
+        <div class="metric-bar-row">
+          <div class="metric-bar-label">L3</div>
+          <div class="metric-bar-track"><div class="metric-bar-fill" style="width:70%;background:#7a6b1a;"></div></div>
+          <div class="metric-bar-value">&gt; 70% of ACs pass</div>
+        </div>
+        <div class="metric-bar-row">
+          <div class="metric-bar-label">L4</div>
+          <div class="metric-bar-track"><div class="metric-bar-fill" style="width:90%;background:#2d7a3a;"></div></div>
+          <div class="metric-bar-value">&gt; 90% sustained</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-name">Escape Rate</div>
+      <div class="metric-source">Source: ADO blocked items / tasks/escapes/</div>
+      <div class="metric-bars">
+        <div class="metric-bar-row">
+          <div class="metric-bar-label">L3</div>
+          <div class="metric-bar-track"><div class="metric-bar-fill" style="width:80%;background:#7a6b1a;"></div></div>
+          <div class="metric-bar-value">&lt; 20% of tasks escape</div>
+        </div>
+        <div class="metric-bar-row">
+          <div class="metric-bar-label">L4</div>
+          <div class="metric-bar-track"><div class="metric-bar-fill" style="width:90%;background:#2d7a3a;"></div></div>
+          <div class="metric-bar-value">&lt; 10% of tasks escape</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-name">Regression Rate</div>
+      <div class="metric-source">Source: automated test suite (auto-detected per repo)</div>
+      <div class="metric-bars">
+        <div class="metric-bar-row">
+          <div class="metric-bar-label">L3</div>
+          <div class="metric-bar-track"><div class="metric-bar-fill" style="width:90%;background:#7a6b1a;"></div></div>
+          <div class="metric-bar-value">&lt; 10% regressions</div>
+        </div>
+        <div class="metric-bar-row">
+          <div class="metric-bar-label">L4</div>
+          <div class="metric-bar-track"><div class="metric-bar-fill" style="width:95%;background:#2d7a3a;"></div></div>
+          <div class="metric-bar-value">&lt; 5% regressions</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-name">Critic Pass Rate</div>
+      <div class="metric-source">Source: docs/plans/*-critic-report.md</div>
+      <div class="metric-bars">
+        <div class="metric-bar-row">
+          <div class="metric-bar-label">L3</div>
+          <div class="metric-bar-track"><div class="metric-bar-fill" style="width:70%;background:#7a6b1a;"></div></div>
+          <div class="metric-bar-value">&gt; 70% critic checks pass</div>
+        </div>
+        <div class="metric-bar-row">
+          <div class="metric-bar-label">L4</div>
+          <div class="metric-bar-track"><div class="metric-bar-fill" style="width:85%;background:#2d7a3a;"></div></div>
+          <div class="metric-bar-value">&gt; 85% critic checks pass</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</div><!-- /.page -->
+
+<div class="footer">
+  PM L4 Workflow Design &nbsp;·&nbsp; 2026-04-26 &nbsp;·&nbsp; Internal
+</div>
+
+</body>
+</html>
