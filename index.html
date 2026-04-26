@@ -1,72 +1,365 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>kei02003.github.io</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>kei02003 — index</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #f5f1ea;
+      --paper: #fbf8f2;
+      --ink: #1c1815;
+      --muted: #76695b;
+      --hairline: #e3dccf;
+      --hairline-strong: #d4c9b6;
+      --rust: #b54a1e;
+    }
+
     * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+
     body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      line-height: 1.6;
-      color: #1a1a1a;
-      background: #fff;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Fraunces", Georgia, serif;
+      font-variation-settings: "opsz" 14;
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
-    .page {
-      max-width: 760px;
+
+    a { color: inherit; }
+    code { font-family: "JetBrains Mono", monospace; font-size: 0.88em; }
+
+    .wrap {
+      max-width: 1040px;
       margin: 0 auto;
-      padding: 56px 24px 72px;
+      padding: 0 32px;
     }
-    h1 {
-      margin: 0 0 10px;
-      font-size: 2rem;
+
+    /* ── Header ───────────────────────────────────────── */
+    header {
+      padding: 26px 0;
+      border-bottom: 1px solid var(--hairline);
     }
-    p {
-      margin: 0 0 24px;
-      color: #444;
+    header .wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .brand {
+      font-family: "Fraunces", Georgia, serif;
+      font-variation-settings: "opsz" 144, "wght" 500;
+      font-size: 19px;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+      color: var(--ink);
+    }
+    .brand em {
+      font-style: italic;
+      font-variation-settings: "opsz" 144, "wght" 400;
+      color: var(--muted);
+      margin-left: 6px;
     }
     nav {
-      display: grid;
-      gap: 12px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11.5px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
-    .nav-link {
-      display: block;
-      border: 1px solid #e8e8e8;
-      border-radius: 8px;
-      padding: 14px 16px;
+    nav a {
+      color: var(--muted);
       text-decoration: none;
-      color: #1a1a1a;
-      background: #f7f7f7;
-      font-weight: 600;
+      margin-left: 28px;
+      transition: color 0.15s ease;
     }
-    .nav-link:hover {
-      border-color: #2d7a3a;
-      background: #e8f5eb;
+    nav a:hover { color: var(--rust); }
+    nav a[aria-current] { color: var(--ink); }
+
+    /* ── Hero ─────────────────────────────────────────── */
+    .hero { padding: 128px 0 96px; }
+    .hero .lede {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      margin: 0 0 32px;
     }
-    .path {
-      display: block;
-      margin-top: 2px;
-      color: #666;
-      font-size: 0.9rem;
+    .hero h1 {
+      font-family: "Fraunces", Georgia, serif;
+      font-variation-settings: "opsz" 144, "wght" 380;
+      font-size: clamp(36px, 5.4vw, 60px);
+      line-height: 1.05;
+      letter-spacing: -0.025em;
+      margin: 0 0 32px;
+      max-width: 820px;
+    }
+    .hero h1 em {
+      font-style: italic;
+      font-variation-settings: "opsz" 144, "wght" 380, "SOFT" 100;
+      color: var(--rust);
+    }
+    .hero p {
+      font-family: "Fraunces", Georgia, serif;
+      font-variation-settings: "opsz" 24, "wght" 400;
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0;
+      line-height: 1.55;
+    }
+
+    /* ── Section ──────────────────────────────────────── */
+    .section {
+      padding: 56px 0 128px;
+      border-top: 1px solid var(--hairline);
+    }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 36px;
+    }
+    .section-head h2 {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
       font-weight: 500;
+      margin: 0;
+      color: var(--muted);
+    }
+    .section-head a {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    .section-head a:hover { color: var(--rust); }
+
+    /* ── Grid + cards ─────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 28px;
+    }
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      position: relative;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 36px -12px rgba(28,24,21,0.18);
+      border-color: var(--hairline-strong);
+    }
+    .card .thumb {
+      aspect-ratio: 16 / 10;
+      border-bottom: 1px solid var(--hairline);
+      position: relative;
+      overflow: hidden;
+    }
+    .card .index {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.85);
+      mix-blend-mode: difference;
+    }
+    .card .body {
+      padding: 18px 20px 20px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .card .title {
+      font-family: "Fraunces", Georgia, serif;
+      font-variation-settings: "opsz" 60, "wght" 500;
+      font-size: 19px;
+      line-height: 1.25;
+      letter-spacing: -0.012em;
+      margin: 0 0 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .card .title .arrow {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 14px;
+      color: var(--muted);
+      opacity: 0;
+      transform: translateX(-4px);
+      transition: opacity 0.2s ease, transform 0.2s ease, color 0.2s ease;
+    }
+    .card:hover .title .arrow {
+      opacity: 1;
+      transform: translateX(0);
+      color: var(--rust);
+    }
+    .card .desc {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin: 0 0 16px;
+      flex-grow: 1;
+    }
+    .card .meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+    .status { display: inline-flex; align-items: center; gap: 7px; }
+    .status::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+      flex-shrink: 0;
+    }
+    .status.live::before     { background: #5b8c5a; }
+    .status.wip::before      { background: #c98a2c; }
+    .status.archived::before { background: #aa9d8d; }
+
+    /* Sample placeholder thumbs — replace with screenshots later */
+    .thumb-1 { background: linear-gradient(135deg, #c8b9a0 0%, #b54a1e 100%); }
+    .thumb-2 { background: linear-gradient(140deg, #2c3e3d 0%, #5b8c5a 100%); }
+    .thumb-3 { background: linear-gradient(155deg, #d4c9b6 0%, #6b5b4a 100%); }
+
+    /* ── Footer ───────────────────────────────────────── */
+    footer {
+      padding: 36px 0 56px;
+      border-top: 1px solid var(--hairline);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+    footer .wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    footer .links a {
+      color: var(--muted);
+      text-decoration: none;
+      margin-left: 24px;
+      transition: color 0.15s ease;
+    }
+    footer .links a:hover { color: var(--rust); }
+
+    /* ── Responsive ───────────────────────────────────── */
+    @media (max-width: 600px) {
+      .wrap { padding: 0 20px; }
+      .hero { padding: 72px 0 56px; }
+      nav a { margin-left: 16px; }
+      .grid { gap: 20px; }
+      .section { padding: 44px 0 80px; }
+      footer .links a:first-child { margin-left: 0; }
     }
   </style>
 </head>
 <body>
-  <main class="page">
-    <h1>Site Navigation</h1>
-    <p>Choose a page:</p>
-    <nav aria-label="Primary navigation">
-      <a class="nav-link" href="/about.html">
-        About
-        <span class="path">/about.html</span>
-      </a>
-      <a class="nav-link" href="/projects/">
-        Projects
-        <span class="path">/projects/</span>
-      </a>
-    </nav>
+  <header>
+    <div class="wrap">
+      <nav>
+        <a href="/projects/">Projects</a>
+        <a href="/about.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <p class="lede">No. 01 / Index</p>
+        <h1>Repo of prototypes & ideas.</h1>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Recent</h2>
+          <a href="/projects/">All projects →</a>
+        </div>
+        <div class="grid">
+          <a class="card" href="/projects/pm_automation_maturity.html">
+            <div class="thumb thumb-1"><span class="index">01</span></div>
+            <div class="body">
+              <h3 class="title"><span>PM Automation Maturity</span><span class="arrow">→</span></h3>
+              <p class="desc">A maturity model for automation in product management workflows.</p>
+              <div class="meta">
+                <span class="status live">Live</span>
+                <span>Apr 2026</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="card" href="/projects/example-two/">
+            <div class="thumb thumb-2"><span class="index">02</span></div>
+            <div class="body">
+              <h3 class="title"><span>Sample prototype two</span><span class="arrow">→</span></h3>
+              <p class="desc">Color palette explorer with a draggable hue wheel and copy-to-clipboard tokens.</p>
+              <div class="meta">
+                <span class="status wip">WIP</span>
+                <span>Mar 2026</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="card" href="/projects/example-three/">
+            <div class="thumb thumb-3"><span class="index">03</span></div>
+            <div class="body">
+              <h3 class="title"><span>Sample prototype three</span><span class="arrow">→</span></h3>
+              <p class="desc">An onboarding flow study — three screens, two decisions, one small joke.</p>
+              <div class="meta">
+                <span class="status archived">Archived</span>
+                <span>Jan 2026</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
   </main>
+
+  <footer>
+    <div class="wrap">
+      <span>© 2026 · kei02003</span>
+      <div class="links">
+        <a href="https://github.com/kei02003">GitHub</a>
+        <a href="/about.html">About</a>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>
