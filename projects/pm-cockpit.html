@@ -1,0 +1,3272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PM Cockpit — Prototype</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-dark:  #1a5c2e;
+    --green-mid:   #2d7a3a;
+    --green-light: #e8f5eb;
+    --olive:       #7a6b1a;
+    --olive-mid:   #a89636;
+    --olive-light: #f5f2e0;
+    --red-mid:     #b04020;
+    --red-dark:    #7a1e1e;
+    --red-light:   #fdf0ec;
+    --blue-mid:    #3a5cc4;
+    --blue-light:  #f0f4ff;
+    --purple-mid:  #8b4faf;
+    --purple-light:#f4eef7;
+    --gray-50:     #fafafa;
+    --gray-100:    #f7f7f7;
+    --gray-150:    #efefef;
+    --gray-200:    #e8e8e8;
+    --gray-300:    #d0d0d0;
+    --gray-500:    #888;
+    --gray-600:    #666;
+    --gray-700:    #444;
+    --gray-900:    #1a1a1a;
+    --radius:      8px;
+    --radius-sm:   5px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--gray-900);
+    background: var(--gray-100);
+    line-height: 1.5;
+    font-size: 14px;
+  }
+
+  .mono {
+    font-family: 'SF Mono', 'Fira Code', Menlo, monospace;
+  }
+
+  /* ─── Page framing ─── */
+  .frame-intro {
+    background: #fff;
+    border-bottom: 1px solid var(--gray-200);
+    padding: 32px 0 28px;
+  }
+  .frame-intro-inner {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--green-light);
+    color: var(--green-dark);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+  .eyebrow .dot {
+    width: 8px; height: 8px;
+    background: var(--green-mid);
+    border-radius: 50%;
+  }
+  .frame-intro h1 {
+    font-size: 1.85rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 10px;
+    max-width: 700px;
+  }
+  .frame-intro p.lede {
+    color: var(--gray-700);
+    max-width: 640px;
+    margin-bottom: 6px;
+  }
+  .frame-intro p.meta {
+    font-size: 0.82rem;
+    color: var(--gray-500);
+    margin-top: 12px;
+  }
+
+  /* ─── View label ─── */
+  .view-label {
+    max-width: 1320px;
+    margin: 36px auto 14px;
+    padding: 0 24px;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .view-label .num {
+    font-family: 'SF Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--gray-500);
+    text-transform: uppercase;
+  }
+  .view-label .title {
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+  .view-label .sub {
+    font-size: 0.85rem;
+    color: var(--gray-600);
+  }
+
+  /* ─── Cockpit shell ─── */
+  .cockpit {
+    max-width: 1320px;
+    margin: 0 auto 16px;
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    height: 56px;
+    padding: 0 18px;
+    border-bottom: 1px solid var(--gray-200);
+    background: #fff;
+    gap: 16px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+  .brand-mark {
+    width: 24px; height: 24px;
+    border-radius: 5px;
+    background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .topbar-divider {
+    width: 1px; height: 22px;
+    background: var(--gray-200);
+  }
+  .sprint-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: var(--gray-700);
+  }
+  .sprint-pill strong { color: var(--gray-900); }
+  .level-badge {
+    background: var(--olive-light);
+    color: var(--olive);
+    font-weight: 800;
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+  }
+  .topbar-spacer { flex: 1; }
+  .cmd-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.82rem;
+    color: var(--gray-700);
+    cursor: pointer;
+    min-width: 280px;
+  }
+  .cmd-button:hover { border-color: var(--green-mid); background: #fff; }
+  .cmd-button .placeholder { flex: 1; text-align: left; }
+  .cmd-button .kbd {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-size: 0.7rem;
+    color: var(--gray-500);
+    font-family: 'SF Mono', monospace;
+  }
+  .topbar-icon-btn {
+    width: 32px; height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    color: var(--gray-500);
+    cursor: pointer;
+    position: relative;
+  }
+  .topbar-icon-btn:hover { background: var(--gray-100); color: var(--gray-700); }
+  .notif-dot {
+    position: absolute;
+    top: 6px; right: 7px;
+    width: 7px; height: 7px;
+    background: var(--red-mid);
+    border-radius: 50%;
+    border: 1.5px solid #fff;
+  }
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #d0a8e0, #8b4faf);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  /* ── Three-column body ── */
+  .cockpit-body {
+    display: grid;
+    grid-template-columns: 300px 1fr 280px;
+    min-height: 720px;
+  }
+
+  /* ── Left rail: Review queue ── */
+  .queue {
+    border-right: 1px solid var(--gray-200);
+    background: var(--gray-50);
+    display: flex;
+    flex-direction: column;
+  }
+  .queue-header {
+    padding: 16px 18px 10px;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .queue-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+  }
+  .queue-count {
+    font-size: 1.45rem;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .queue-count .ago { font-size: 0.78rem; font-weight: 500; color: var(--gray-500); margin-left: 6px; }
+  .queue-tabs {
+    display: flex;
+    gap: 4px;
+    margin-top: 10px;
+  }
+  .queue-tab {
+    font-size: 0.75rem;
+    color: var(--gray-600);
+    padding: 4px 9px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .queue-tab.active {
+    background: #fff;
+    color: var(--gray-900);
+    font-weight: 600;
+    border: 1px solid var(--gray-200);
+  }
+  .queue-tab:not(.active):hover { background: var(--gray-150); }
+
+  .queue-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 0;
+  }
+  .qi {
+    display: flex;
+    gap: 10px;
+    padding: 12px 18px;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+    border-bottom: 1px solid var(--gray-150);
+  }
+  .qi:hover { background: #fff; }
+  .qi.selected {
+    background: #fff;
+    border-left-color: var(--green-mid);
+  }
+  .qi-icon {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #fff;
+    margin-top: 1px;
+  }
+  .qi-icon.feat { background: var(--green-mid); }
+  .qi-icon.story { background: var(--blue-mid); }
+  .qi-icon.bug { background: var(--red-mid); }
+  .qi-icon.spec { background: var(--olive-mid); }
+  .qi-body { flex: 1; min-width: 0; }
+  .qi-line1 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+  }
+  .qi-cmd {
+    font-family: 'SF Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--green-dark);
+    font-weight: 700;
+  }
+  .qi-when {
+    font-size: 0.7rem;
+    color: var(--gray-500);
+    margin-left: auto;
+  }
+  .qi-title {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .qi-meta {
+    font-size: 0.74rem;
+    color: var(--gray-600);
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .qi-verdict {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .v-mixed { background: var(--olive-light); color: var(--olive); }
+  .v-pass  { background: var(--green-light); color: var(--green-dark); }
+  .v-fail  { background: var(--red-light); color: var(--red-mid); }
+  .v-pending { background: var(--gray-150); color: var(--gray-600); }
+
+  /* ── Main pane: acceptance report ── */
+  .main {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .main-header {
+    padding: 18px 26px 14px;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .main-crumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.76rem;
+    color: var(--gray-500);
+    margin-bottom: 8px;
+  }
+  .main-crumb .sep { color: var(--gray-300); }
+  .main-crumb a { color: var(--gray-500); }
+  .main-title-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .main-title-row h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+  .main-title-row .titlecol { flex: 1; }
+  .main-meta {
+    display: flex;
+    gap: 14px;
+    font-size: 0.78rem;
+    color: var(--gray-600);
+    flex-wrap: wrap;
+  }
+  .main-meta strong { color: var(--gray-900); font-weight: 600; }
+  .main-meta .sep { color: var(--gray-300); }
+
+  .verdict-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    background: var(--olive-light);
+    border: 1px solid #e3d9a8;
+    margin-top: 14px;
+    font-size: 0.85rem;
+  }
+  .verdict-icon {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--olive);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .verdict-banner strong { color: var(--olive); }
+
+  /* ─ AC list ─ */
+  .ac-list {
+    padding: 18px 26px 90px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .ac-list-header {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-bottom: 12px;
+  }
+  .ac {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .ac-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+  }
+  .ac.fail { border-color: #e3b8a8; }
+  .ac.fail .ac-head { background: var(--red-light); }
+  .ac.pass .ac-head:hover { background: var(--gray-50); }
+
+  .ac-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    font-size: 0.78rem;
+    font-weight: 800;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .ac-status.pass { background: var(--green-mid); color: #fff; }
+  .ac-status.fail { background: var(--red-mid); color: #fff; }
+  .ac-text {
+    flex: 1;
+    font-size: 0.9rem;
+    color: var(--gray-900);
+    line-height: 1.45;
+  }
+  .ac-text .acid {
+    font-family: 'SF Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--gray-500);
+    margin-right: 6px;
+  }
+  .ac-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 7px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .ac-tag.pass { background: var(--green-light); color: var(--green-dark); }
+  .ac-tag.fail { background: var(--red-mid); color: #fff; }
+
+  .ac-body {
+    border-top: 1px solid var(--gray-200);
+    padding: 14px;
+    background: #fff;
+    font-size: 0.84rem;
+    color: var(--gray-700);
+  }
+  .ac.fail .ac-body { background: #fff; }
+  .ac-evidence-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-bottom: 6px;
+  }
+  .ac-evidence {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-family: 'SF Mono', monospace;
+    font-size: 0.76rem;
+    color: var(--gray-700);
+    margin-bottom: 10px;
+    line-height: 1.55;
+  }
+  .ac-evidence .pass-line { color: var(--green-dark); }
+  .ac-evidence .fail-line { color: var(--red-mid); }
+  .ac-evidence .muted { color: var(--gray-500); }
+
+  .ac-cause {
+    background: #fffaf0;
+    border: 1px solid #f0d9a8;
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 0.82rem;
+    color: var(--gray-700);
+    margin-bottom: 10px;
+    display: flex;
+    gap: 8px;
+  }
+  .ac-cause-label {
+    font-weight: 700;
+    color: var(--olive);
+    flex-shrink: 0;
+  }
+  .ac-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .ac-action {
+    font-size: 0.78rem;
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 5px;
+    padding: 5px 10px;
+    color: var(--gray-700);
+    cursor: pointer;
+  }
+  .ac-action:hover { border-color: var(--green-mid); color: var(--green-dark); }
+  .ac-action.primary { background: var(--green-mid); color: #fff; border-color: var(--green-mid); }
+  .ac-action.primary:hover { background: var(--green-dark); border-color: var(--green-dark); }
+
+  /* ─ Sticky decision bar ─ */
+  .decision-bar {
+    border-top: 1px solid var(--gray-200);
+    padding: 14px 26px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .decision-bar .summary {
+    flex: 1;
+    font-size: 0.84rem;
+    color: var(--gray-700);
+  }
+  .decision-bar .summary strong { color: var(--gray-900); }
+  .btn {
+    font-size: 0.85rem;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--gray-200);
+    background: #fff;
+    color: var(--gray-700);
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .btn:hover { border-color: var(--gray-300); }
+  .btn.primary {
+    background: var(--green-mid);
+    border-color: var(--green-mid);
+    color: #fff;
+    font-weight: 600;
+  }
+  .btn.primary:hover { background: var(--green-dark); border-color: var(--green-dark); }
+  .btn.warn {
+    background: #fff;
+    border-color: var(--red-mid);
+    color: var(--red-mid);
+  }
+  .btn.warn:hover { background: var(--red-light); }
+
+  /* ── Right rail: sprint health + in-flight ── */
+  .rail {
+    border-left: 1px solid var(--gray-200);
+    background: var(--gray-50);
+    overflow-y: auto;
+  }
+  .rail-section {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .rail-section h4 {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .rail-section h4 a {
+    font-size: 0.7rem;
+    color: var(--green-mid);
+    letter-spacing: 0;
+    text-transform: none;
+    font-weight: 600;
+  }
+  .metric {
+    margin-bottom: 14px;
+  }
+  .metric:last-child { margin-bottom: 0; }
+  .metric-row1 {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .metric-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--gray-900);
+  }
+  .metric-value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--gray-900);
+  }
+  .metric-value.green { color: var(--green-dark); }
+  .metric-value.olive { color: var(--olive); }
+  .metric-value.red   { color: var(--red-mid); }
+  .metric-bar-track {
+    height: 6px;
+    background: var(--gray-200);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 4px;
+  }
+  .metric-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+  }
+  .metric-bar-fill.green { background: var(--green-mid); }
+  .metric-bar-fill.olive { background: var(--olive-mid); }
+  .metric-bar-fill.red   { background: var(--red-mid); }
+  .metric-target-marker {
+    position: absolute;
+    top: -2px;
+    width: 2px;
+    height: 10px;
+    background: var(--gray-700);
+  }
+  .metric-foot {
+    font-size: 0.7rem;
+    color: var(--gray-500);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .inflight-item {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .inflight-item:last-child { border-bottom: none; }
+  .inflight-row1 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .agent-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green-mid);
+    flex-shrink: 0;
+    position: relative;
+  }
+  .agent-dot.pulse::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 1.5px solid var(--green-mid);
+    opacity: 0.4;
+    animation: pulse 1.6s ease-out infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 0.45; }
+    100% { transform: scale(1.8); opacity: 0; }
+  }
+  .inflight-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .inflight-status {
+    font-size: 0.72rem;
+    color: var(--gray-600);
+  }
+  .inflight-progress {
+    height: 4px;
+    background: var(--gray-200);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .inflight-progress-fill {
+    height: 100%;
+    background: var(--green-mid);
+    border-radius: 2px;
+  }
+
+  /* ── Annotation callouts ── */
+  .annotations {
+    max-width: 1320px;
+    margin: 6px auto 32px;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .anno {
+    background: #fff;
+    border: 1px dashed var(--gray-300);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    color: var(--gray-700);
+    line-height: 1.5;
+  }
+  .anno strong { color: var(--gray-900); }
+  .anno .anno-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px; height: 18px;
+    background: var(--gray-700);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-right: 8px;
+  }
+
+  /* ─── Second view: Spec validation ─── */
+  .spec-shell {
+    max-width: 1320px;
+    margin: 0 auto 16px;
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .spec-topbar {
+    display: flex;
+    align-items: center;
+    height: 48px;
+    padding: 0 18px;
+    border-bottom: 1px solid var(--gray-200);
+    background: var(--gray-50);
+    gap: 12px;
+  }
+  .spec-topbar .filename {
+    font-family: 'SF Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--gray-700);
+  }
+  .spec-topbar .gate {
+    font-size: 0.74rem;
+    color: var(--olive);
+    background: var(--olive-light);
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-weight: 600;
+  }
+  .spec-topbar .ph2 {
+    font-size: 0.72rem;
+    color: var(--gray-500);
+    background: var(--gray-150);
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+  }
+  .spec-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 480px;
+  }
+  .spec-col {
+    padding: 20px 24px;
+  }
+  .spec-col + .spec-col {
+    border-left: 1px solid var(--gray-200);
+    background: var(--gray-50);
+  }
+  .spec-col h3 {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-bottom: 4px;
+  }
+  .spec-col .author {
+    font-size: 0.78rem;
+    color: var(--gray-500);
+    margin-bottom: 16px;
+  }
+  .spec-col .author strong { color: var(--gray-700); }
+  .spec-original {
+    font-size: 0.92rem;
+    color: var(--gray-700);
+    line-height: 1.6;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .spec-original-ac {
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--gray-300);
+  }
+  .spec-original-ac:last-child { border-bottom: none; padding-bottom: 0; }
+  .spec-original-ac .label {
+    font-family: 'SF Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--gray-500);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .verified-ac {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .verified-ac.approved {
+    border-color: #b8dbbe;
+    background: var(--green-light);
+  }
+  .verified-ac.editing {
+    border-color: var(--olive);
+    box-shadow: 0 0 0 3px rgba(122,107,26,0.10);
+    background: #fff;
+  }
+  .verified-ac-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .verified-ac-id {
+    font-family: 'SF Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--gray-500);
+    font-weight: 700;
+  }
+  .verified-ac-state {
+    font-size: 0.7rem;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .verified-ac-state.approved { background: var(--green-mid); color: #fff; }
+  .verified-ac-state.editing { background: var(--olive); color: #fff; }
+  .verified-ac-state.pending { background: var(--gray-200); color: var(--gray-700); }
+  .verified-ac-arrow {
+    font-size: 0.78rem;
+    color: var(--gray-500);
+    margin-left: auto;
+  }
+  .verified-ac-content {
+    font-family: 'SF Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--gray-900);
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+  .verified-ac.editing .verified-ac-content {
+    background: #fff;
+    border: 1px solid var(--gray-300);
+    border-radius: 4px;
+    padding: 10px 12px;
+  }
+  .verified-ac-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .vac-btn {
+    font-size: 0.76rem;
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--gray-200);
+    background: #fff;
+    color: var(--gray-700);
+    cursor: pointer;
+  }
+  .vac-btn.primary { background: var(--olive); color: #fff; border-color: var(--olive); }
+
+  .spec-foot {
+    border-top: 1px solid var(--gray-200);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+  }
+  .spec-foot .progress {
+    flex: 1;
+    font-size: 0.82rem;
+    color: var(--gray-700);
+  }
+  .spec-foot .progress strong { color: var(--gray-900); }
+  .spec-foot .gate-msg {
+    font-size: 0.78rem;
+    color: var(--olive);
+  }
+
+  /* ─── View 3: contextual button cards ─── */
+  .contextual-grid {
+    max-width: 1320px;
+    margin: 0 auto 16px;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .ctx-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    display: flex;
+    flex-direction: column;
+  }
+  .ctx-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--gray-150);
+  }
+  .ctx-header .qi-icon {
+    width: 28px; height: 28px;
+    font-size: 0.78rem;
+  }
+  .ctx-header-body { flex: 1; min-width: 0; }
+  .ctx-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 2px;
+    line-height: 1.35;
+  }
+  .ctx-meta {
+    font-size: 0.74rem;
+    color: var(--gray-600);
+  }
+  .ctx-state {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+  .ctx-state.fail { background: var(--red-light); color: var(--red-mid); }
+  .ctx-state.ready { background: var(--olive-light); color: var(--olive); }
+  .ctx-state.pass { background: var(--green-light); color: var(--green-dark); }
+  .ctx-explain {
+    font-size: 0.83rem;
+    color: var(--gray-700);
+    line-height: 1.55;
+    margin-bottom: 14px;
+  }
+  .ctx-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .ctx-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    padding: 9px 12px;
+    cursor: pointer;
+  }
+  .ctx-btn:hover { border-color: var(--gray-300); background: var(--gray-50); }
+  .ctx-btn.primary {
+    background: var(--green-mid);
+    border-color: var(--green-mid);
+  }
+  .ctx-btn.primary:hover { background: var(--green-dark); border-color: var(--green-dark); }
+  .ctx-btn.primary .ctx-btn-label { color: #fff; }
+  .ctx-btn.primary .ctx-btn-cmd { color: rgba(255,255,255,0.78); }
+  .ctx-btn.ghost {
+    border-color: transparent;
+    background: transparent;
+    padding: 6px 12px;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    color: var(--gray-600);
+    font-size: 0.82rem;
+  }
+  .ctx-btn.ghost:hover { background: var(--gray-100); color: var(--gray-900); }
+  .ctx-btn-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--gray-900);
+  }
+  .ctx-btn-cmd {
+    font-family: 'SF Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--gray-500);
+    margin-top: 2px;
+  }
+  .ctx-was-disabled {
+    margin-top: auto;
+    padding: 10px 12px;
+    background: var(--gray-50);
+    border: 1px dashed var(--gray-300);
+    border-radius: 5px;
+    font-size: 0.74rem;
+    color: var(--gray-600);
+    line-height: 1.5;
+  }
+  .ctx-was-disabled strong { color: var(--gray-900); }
+
+  /* ─── View 4: preview-and-confirm panel ─── */
+  .preview-shell {
+    max-width: 1320px;
+    margin: 0 auto 16px;
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .preview-header {
+    padding: 20px 26px 16px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    background: var(--gray-50);
+  }
+  .preview-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green-mid);
+    margin-bottom: 6px;
+  }
+  .preview-header h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .preview-sub {
+    font-size: 0.8rem;
+    color: var(--gray-600);
+    line-height: 1.5;
+  }
+  .preview-step-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-top: 14px;
+  }
+  .preview-step-indicator .step {
+    font-size: 0.74rem;
+    color: var(--gray-500);
+    padding: 5px 12px;
+    border-radius: 16px;
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    white-space: nowrap;
+  }
+  .preview-step-indicator .step.done {
+    color: var(--green-dark);
+    background: var(--green-light);
+    border-color: #b8dbbe;
+  }
+  .preview-step-indicator .step.current {
+    color: #fff;
+    background: var(--green-mid);
+    border-color: var(--green-mid);
+    font-weight: 600;
+  }
+  .preview-step-indicator .arrow {
+    color: var(--gray-300);
+    font-size: 0.8rem;
+  }
+
+  .preview-body {
+    padding: 20px 26px 6px;
+  }
+  .preview-section {
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .preview-section.editing {
+    border-color: var(--olive);
+    box-shadow: 0 0 0 3px rgba(122,107,26,0.10);
+  }
+  .preview-section-head {
+    padding: 10px 16px;
+    background: var(--gray-50);
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--gray-200);
+    gap: 10px;
+  }
+  .preview-section.editing .preview-section-head {
+    background: var(--olive-light);
+    border-bottom-color: #e3d9a8;
+  }
+  .preview-section-head h4 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex: 1;
+  }
+  .preview-source {
+    font-size: 0.72rem;
+    color: var(--gray-500);
+    font-family: 'SF Mono', monospace;
+  }
+  .edit-btn {
+    font-size: 0.74rem;
+    color: var(--gray-600);
+    background: transparent;
+    border: 1px solid transparent;
+    padding: 3px 9px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .edit-btn:hover { background: #fff; border-color: var(--gray-200); color: var(--gray-900); }
+  .editing-tag {
+    font-size: 0.66rem;
+    font-weight: 700;
+    color: #fff;
+    background: var(--olive);
+    padding: 2px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .preview-section-body {
+    padding: 14px 16px;
+    font-size: 0.88rem;
+    color: var(--gray-700);
+    line-height: 1.6;
+  }
+  .preview-section-body p { margin-bottom: 8px; }
+  .preview-section-body p:last-child { margin-bottom: 0; }
+  .preview-section-body ul {
+    margin: 6px 0 0 0;
+    padding-left: 18px;
+  }
+  .preview-section-body ul li { margin-bottom: 6px; }
+  .preview-section-body ul li:last-child { margin-bottom: 0; }
+  .preview-section-body strong { color: var(--gray-900); }
+  .preview-section.editing .preview-section-body {
+    background: #fffefa;
+  }
+  .editable-mark {
+    background: var(--olive-light);
+    padding: 0 2px;
+    border-bottom: 1px dashed var(--olive);
+  }
+
+  .preview-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .pmetric {
+    padding: 10px 12px;
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    background: var(--gray-50);
+  }
+  .pmetric-name {
+    font-size: 0.72rem;
+    color: var(--gray-600);
+    margin-bottom: 4px;
+  }
+  .pmetric-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gray-900);
+  }
+  .pmetric-value.olive { color: var(--olive); }
+  .pmetric-target {
+    font-size: 0.7rem;
+    color: var(--gray-500);
+    margin-top: 2px;
+  }
+
+  .preview-foot {
+    border-top: 1px solid var(--gray-200);
+    padding: 14px 26px;
+    background: var(--gray-50);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .preview-dest { flex: 1; }
+  .dest-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-bottom: 8px;
+  }
+  .dest-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  .dest-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.82rem;
+    color: var(--gray-700);
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 16px;
+    padding: 4px 12px 4px 6px;
+    cursor: pointer;
+  }
+  .dest-chip:hover { border-color: var(--gray-300); }
+  .dest-chip.checked {
+    background: var(--green-light);
+    border-color: #b8dbbe;
+    color: var(--green-dark);
+    font-weight: 600;
+  }
+  .chip-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--gray-300);
+    font-size: 0.72rem;
+    border: 1.5px solid var(--gray-300);
+    font-weight: 800;
+  }
+  .dest-chip.checked .chip-mark {
+    background: var(--green-mid);
+    color: #fff;
+    border-color: var(--green-mid);
+  }
+  .preview-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 1100px) {
+    .contextual-grid { grid-template-columns: 1fr; }
+    .preview-metrics { grid-template-columns: repeat(2, 1fr); }
+    .preview-header { flex-direction: column; }
+    .preview-step-indicator { margin-top: 0; }
+    .preview-foot { flex-direction: column; align-items: stretch; }
+  }
+
+  /* ─── Footer ─── */
+  .footer {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 32px 24px 48px;
+    color: var(--gray-500);
+    font-size: 0.82rem;
+    text-align: center;
+    border-top: 1px solid var(--gray-200);
+  }
+
+  /* ── Responsive: stack on narrow screens ── */
+  @media (max-width: 1100px) {
+    .cockpit-body { grid-template-columns: 280px 1fr; }
+    .rail { display: none; }
+    .annotations { grid-template-columns: 1fr; }
+    .spec-body { grid-template-columns: 1fr; }
+    .spec-col + .spec-col { border-left: none; border-top: 1px solid var(--gray-200); }
+  }
+  @media (max-width: 720px) {
+    .cockpit-body { grid-template-columns: 1fr; }
+    .queue { display: none; }
+    .topbar { flex-wrap: wrap; height: auto; padding: 10px 14px; }
+    .cmd-button { min-width: 0; flex: 1; }
+  }
+  /* ─── Interactive: swappable detail panes ─── */
+  .main-detail {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+  .main-detail.active { display: flex; }
+
+  .qi { user-select: none; }
+  .ac-head { user-select: none; }
+  .ac.collapsed .ac-body { display: none; }
+
+  /* Pulse on click for queue items */
+  @keyframes click-flash {
+    0%   { background: var(--green-light); }
+    100% { background: #fff; }
+  }
+  .qi.flashed { animation: click-flash 0.4s ease-out; }
+
+  /* Sent confirmation state */
+  .btn.sent {
+    background: var(--green-dark) !important;
+    border-color: var(--green-dark) !important;
+    color: #fff !important;
+  }
+
+  /* Disabled-but-visible action button */
+  .btn[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* For pending AC clickable state */
+  .verified-ac { cursor: default; }
+  .verified-ac[data-ac]:not(.approved):not(.editing) {
+    cursor: pointer;
+  }
+  .verified-ac[data-ac]:not(.approved):not(.editing):hover {
+    border-color: var(--olive);
+    background: #fffefa;
+  }
+
+  /* ─── Side navigation ─── */
+  .side-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    background: #fff;
+    border-right: 1px solid var(--gray-200);
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+    flex-direction: column;
+    font-size: 0.85rem;
+  }
+  .side-nav-eyebrow {
+    font-family: 'SF Mono', monospace;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    padding: 0 20px 14px;
+    border-bottom: 1px solid var(--gray-150);
+    margin-bottom: 8px;
+  }
+  .side-nav-eyebrow .accent { color: var(--green-mid); }
+  .side-nav-list {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+  }
+  .side-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px 9px 17px;
+    color: var(--gray-700);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+    user-select: none;
+  }
+  .side-nav-link:hover {
+    background: var(--gray-50);
+    color: var(--gray-900);
+  }
+  .side-nav-link.active {
+    border-left-color: var(--green-mid);
+    background: var(--green-light);
+    color: var(--green-dark);
+  }
+  .side-nav-num {
+    font-family: 'SF Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--gray-500);
+    font-weight: 700;
+    min-width: 18px;
+    flex-shrink: 0;
+  }
+  .side-nav-link.active .side-nav-num { color: var(--green-mid); }
+  .side-nav-label { font-weight: 500; }
+  .side-nav-link.active .side-nav-label { font-weight: 600; }
+  .side-nav-foot {
+    margin-top: auto;
+    padding: 16px 20px;
+    border-top: 1px solid var(--gray-150);
+    font-size: 0.7rem;
+    color: var(--gray-500);
+    line-height: 1.55;
+  }
+  .side-nav-foot strong { color: var(--gray-700); display: block; margin-bottom: 2px; }
+
+  /* Sidebar visible on wide screens (full text labels) */
+  @media (min-width: 1280px) {
+    .side-nav { display: flex; width: 200px; padding: 28px 0 0; }
+    body { padding-left: 200px; }
+  }
+
+  /* Sidebar visible but compact on medium screens (numbers only) */
+  @media (min-width: 1100px) and (max-width: 1279px) {
+    .side-nav { display: flex; width: 56px; padding: 18px 0 0; }
+    body { padding-left: 56px; }
+    .side-nav-eyebrow,
+    .side-nav-foot,
+    .side-nav-label { display: none; }
+    .side-nav-link {
+      padding: 11px 0;
+      justify-content: center;
+      border-left: none;
+      border-right: 3px solid transparent;
+    }
+    .side-nav-link.active { border-right-color: var(--green-mid); }
+    .side-nav-num {
+      min-width: 0;
+      font-size: 0.78rem;
+    }
+  }
+
+</style>
+</head>
+<body>
+
+<!-- Side navigation -->
+<nav class="side-nav" aria-label="Document sections">
+  <div class="side-nav-eyebrow">PM Cockpit · <span class="accent">Prototype</span></div>
+  <ul class="side-nav-list">
+    <li>
+      <a class="side-nav-link" href="#overview">
+        <span class="side-nav-num">·</span>
+        <span class="side-nav-label">Overview</span>
+      </a>
+    </li>
+    <li>
+      <a class="side-nav-link" href="#view-1">
+        <span class="side-nav-num">1</span>
+        <span class="side-nav-label">Cockpit</span>
+      </a>
+    </li>
+    <li>
+      <a class="side-nav-link" href="#view-2">
+        <span class="side-nav-num">2</span>
+        <span class="side-nav-label">Spec gate</span>
+      </a>
+    </li>
+    <li>
+      <a class="side-nav-link" href="#view-3">
+        <span class="side-nav-num">3</span>
+        <span class="side-nav-label">Action patterns</span>
+      </a>
+    </li>
+    <li>
+      <a class="side-nav-link" href="#view-4">
+        <span class="side-nav-num">4</span>
+        <span class="side-nav-label">Send flow</span>
+      </a>
+    </li>
+  </ul>
+  <div class="side-nav-foot">
+    <strong>Companion to</strong>
+    PM Workflow Maturity Model<br>
+    2026-04-26
+  </div>
+</nav>
+
+
+<!-- Intro -->
+<div class="frame-intro" id="overview">
+  <div class="frame-intro-inner">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      Prototype Concept · UI Wrapper for L3 → L4
+    </div>
+    <h1>The PM Cockpit</h1>
+    <p class="lede">
+      A thin review surface that sits over ADO, the repo, and the agents — so the PM's
+      ~90 active minutes/day live in one place instead of split across four.
+    </p>
+    <p class="lede">
+      Two views shown: the daily <strong>Acceptance Review</strong> cockpit (where the PM lives in
+      the morning and afternoon), and the <strong>Spec Validation</strong> gate that unlocks at L4.
+    </p>
+    <p class="meta">Companion mockup to the PM Workflow Maturity Model · 2026-04-26</p>
+  </div>
+</div>
+
+<!-- ───────── VIEW 1: Cockpit ───────── -->
+<div class="view-label" id="view-1">
+  <span class="num">View 1</span>
+  <span class="title">Acceptance Review Cockpit</span>
+  <span class="sub">— afternoon at L3, opening to a feature whose <span class="mono">/accept</span> ran 14 min ago</span>
+</div>
+
+<div class="cockpit">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">PM</div>
+      <span>Cockpit</span>
+    </div>
+    <div class="topbar-divider"></div>
+    <div class="sprint-pill">
+      <span class="level-badge">L3</span>
+      <span><strong>Sprint 23</strong> · Day 4 of 14</span>
+    </div>
+    <div class="topbar-divider"></div>
+    <div class="sprint-pill" style="color:var(--green-dark);">
+      <span style="display:inline-block;width:8px;height:8px;background:var(--green-mid);border-radius:50%;"></span>
+      4 agents working
+    </div>
+
+    <div class="topbar-spacer"></div>
+
+    <button class="cmd-button">
+      <span style="color:var(--gray-500);">⌕</span>
+      <span class="placeholder">Run a command, jump to a spec…</span>
+      <span class="kbd">⌘K</span>
+    </button>
+
+    <div class="topbar-icon-btn" title="Notifications">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="notif-dot"></span>
+    </div>
+    <div class="avatar">ET</div>
+  </div>
+
+  <!-- Three-column body -->
+  <div class="cockpit-body">
+
+    <!-- LEFT: Review queue -->
+    <div class="queue">
+      <div class="queue-header">
+        <div class="queue-title">Review queue</div>
+        <div class="queue-count">7 <span class="ago">awaiting you</span></div>
+        <div class="queue-tabs">
+          <div class="queue-tab active">All</div>
+          <div class="queue-tab">Acceptance</div>
+          <div class="queue-tab">Specs</div>
+          <div class="queue-tab">Bugs</div>
+        </div>
+      </div>
+
+      <div class="queue-list">
+
+        <!-- Selected item -->
+        <div class="qi selected" data-item="feat-1208">
+          <div class="qi-icon feat">F</div>
+          <div class="qi-body">
+            <div class="qi-line1">
+              <span class="qi-cmd">/accept</span>
+              <span class="qi-when">14m ago</span>
+            </div>
+            <div class="qi-title">Multi-tenant export with row-level isolation</div>
+            <div class="qi-meta">
+              <span class="qi-verdict v-mixed">5 / 6 pass</span>
+              <span>· 1 fail</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="qi" data-item="bug-892">
+          <div class="qi-icon bug">B</div>
+          <div class="qi-body">
+            <div class="qi-line1">
+              <span class="qi-cmd">/verify-fix</span>
+              <span class="qi-when">42m</span>
+            </div>
+            <div class="qi-title">Filter pill collapses on resize</div>
+            <div class="qi-meta">
+              <span class="qi-verdict v-pass">VERIFIED</span>
+              <span>· regression test added</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="qi" data-item="story-1190">
+          <div class="qi-icon story">S</div>
+          <div class="qi-body">
+            <div class="qi-line1">
+              <span class="qi-cmd">/accept</span>
+              <span class="qi-when">1h</span>
+            </div>
+            <div class="qi-title">CSV download remembers last selection</div>
+            <div class="qi-meta">
+              <span class="qi-verdict v-pass">3 / 3 pass</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="qi" data-item="doc-audit-log">
+          <div class="qi-icon spec">D</div>
+          <div class="qi-body">
+            <div class="qi-line1">
+              <span class="qi-cmd">/spec-to-issues</span>
+              <span class="qi-when">2h</span>
+            </div>
+            <div class="qi-title">Audit log retention rules</div>
+            <div class="qi-meta">
+              <span class="qi-verdict v-pending">Spec ready</span>
+              <span>· 4 stories planned</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="qi" data-item="feat-1195">
+          <div class="qi-icon feat">F</div>
+          <div class="qi-body">
+            <div class="qi-line1">
+              <span class="qi-cmd">/accept</span>
+              <span class="qi-when">3h</span>
+            </div>
+            <div class="qi-title">Bulk role assignment in admin panel</div>
+            <div class="qi-meta">
+              <span class="qi-verdict v-fail">2 / 4 pass</span>
+              <span>· needs triage</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="qi" data-item="bug-901">
+          <div class="qi-icon bug">B</div>
+          <div class="qi-body">
+            <div class="qi-line1">
+              <span class="qi-cmd">/bug-report</span>
+              <span class="qi-when">4h</span>
+            </div>
+            <div class="qi-title">Date picker timezone off by one</div>
+            <div class="qi-meta">
+              <span class="qi-verdict v-pending">Awaiting kickoff</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="qi" data-item="story-1156">
+          <div class="qi-icon story">S</div>
+          <div class="qi-body">
+            <div class="qi-line1">
+              <span class="qi-cmd">/accept</span>
+              <span class="qi-when">yesterday</span>
+            </div>
+            <div class="qi-title">Sticky table headers in long reports</div>
+            <div class="qi-meta">
+              <span class="qi-verdict v-pass">2 / 2 pass</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MIDDLE: Acceptance report detail -->
+    <div class="main">
+
+      <!-- ─── Pane: FEAT-1208 Multi-tenant export ─── -->
+      <div class="main-detail active" data-item="feat-1208">
+
+      <div class="main-header">
+        <div class="main-crumb">
+          <a>Acceptance</a>
+          <span class="sep">›</span>
+          <a>Sprint 23</a>
+          <span class="sep">›</span>
+          <span>FEAT-1208</span>
+        </div>
+        <div class="main-title-row">
+          <div class="titlecol">
+            <h2>Multi-tenant export with row-level isolation</h2>
+            <div class="main-meta">
+              <span><strong>FEAT-1208</strong></span>
+              <span class="sep">·</span>
+              <span><span class="mono">docs/specs/multi-tenant-export.feature.md</span></span>
+              <span class="sep">·</span>
+              <span>Branch <span class="mono">feat/mt-export-1208</span></span>
+              <span class="sep">·</span>
+              <span>3 commits, 412 +/87 −</span>
+            </div>
+          </div>
+        </div>
+        <div class="verdict-banner">
+          <div class="verdict-icon">!</div>
+          <div>
+            <strong>5 of 6 acceptance criteria pass.</strong>
+            One AC failed with a likely-cause hint — review and decide. Code is not part of this review.
+          </div>
+        </div>
+      </div>
+
+      <!-- AC list -->
+      <div class="ac-list">
+        <div class="ac-list-header">Acceptance criteria · 6 total</div>
+
+        <div class="ac pass">
+          <div class="ac-head">
+            <div class="ac-status pass">✓</div>
+            <div class="ac-text"><span class="acid">AC-1</span>Export endpoint returns only rows belonging to the requesting tenant</div>
+            <div class="ac-tag pass">Pass</div>
+          </div>
+        </div>
+
+        <div class="ac pass">
+          <div class="ac-head">
+            <div class="ac-status pass">✓</div>
+            <div class="ac-text"><span class="acid">AC-2</span>Export respects column-level masking rules from the tenant's policy</div>
+            <div class="ac-tag pass">Pass</div>
+          </div>
+        </div>
+
+        <!-- Failed AC, expanded -->
+        <div class="ac fail">
+          <div class="ac-head">
+            <div class="ac-status fail">✕</div>
+            <div class="ac-text"><span class="acid">AC-3</span>A user from Tenant A cannot read Tenant B's data via the <span class="mono">tenant_id</span> URL parameter</div>
+            <div class="ac-tag fail">Fail</div>
+          </div>
+          <div class="ac-body">
+            <div class="ac-evidence-label">Evidence — automated check</div>
+            <div class="ac-evidence">
+<span class="muted">// test: cross_tenant_url_param_blocked</span><br>
+<span class="muted">request:</span> GET /api/export?tenant_id=B  (auth: tenantA_user)<br>
+<span class="muted">expected:</span> 403 Forbidden<br>
+<span class="fail-line">actual:&nbsp;&nbsp; 200 OK with 47 rows from Tenant B</span><br>
+<span class="muted">// test: cross_tenant_header_blocked</span><br>
+<span class="muted">expected:</span> 403 Forbidden<br>
+<span class="pass-line">actual:&nbsp;&nbsp; 403 Forbidden  ✓</span>
+            </div>
+
+            <div class="ac-cause">
+              <span class="ac-cause-label">Likely cause:</span>
+              <span>The tenant guard middleware is applied to the header path but not the URL-parameter path. <span class="mono">routers/export.py:42</span> reads <span class="mono">tenant_id</span> from query string before the guard runs. A spec ambiguity — neither path was called out explicitly.</span>
+            </div>
+
+            <div class="ac-actions">
+              <button class="ac-action primary">Revise spec & re-run</button>
+              <button class="ac-action">Accept comment in ADO</button>
+              <button class="ac-action">Tag dev (technical blocker)</button>
+              <button class="ac-action">View test in repo</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="ac pass">
+          <div class="ac-head">
+            <div class="ac-status pass">✓</div>
+            <div class="ac-text"><span class="acid">AC-4</span>Audit log records every export with tenant ID, user ID, and row count</div>
+            <div class="ac-tag pass">Pass</div>
+          </div>
+        </div>
+
+        <div class="ac pass">
+          <div class="ac-head">
+            <div class="ac-status pass">✓</div>
+            <div class="ac-text"><span class="acid">AC-5</span>Exports over 100 MB are streamed rather than buffered</div>
+            <div class="ac-tag pass">Pass</div>
+          </div>
+        </div>
+
+        <div class="ac pass">
+          <div class="ac-head">
+            <div class="ac-status pass">✓</div>
+            <div class="ac-text"><span class="acid">AC-6</span>A failed export does not leave a partial file in the user's downloads</div>
+            <div class="ac-tag pass">Pass</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Decision bar -->
+      <div class="decision-bar">
+        <div class="summary">
+          <strong>One AC needs your call.</strong>
+          Approving will ship the 5 passing ACs and leave AC-3 open as a follow-up story.
+        </div>
+        <button class="btn warn">Reject</button>
+        <button class="btn">Approve passing only</button>
+        <button class="btn primary">Revise spec & re-run</button>
+      </div>
+
+      </div><!-- /.main-detail feat-1208 -->
+
+
+      <!-- ─── Pane: BUG-892 Filter pill (verified) ─── -->
+      <div class="main-detail" data-item="bug-892">
+
+        <div class="main-header">
+          <div class="main-crumb">
+            <a>Bug verification</a>
+            <span class="sep">›</span>
+            <a>Sprint 23</a>
+            <span class="sep">›</span>
+            <span>BUG-892</span>
+          </div>
+          <div class="main-title-row">
+            <div class="titlecol">
+              <h2>Filter pill collapses on resize</h2>
+              <div class="main-meta">
+                <span><strong>BUG-892</strong></span>
+                <span class="sep">·</span>
+                <span><span class="mono">docs/bugs/filter-pill-resize.bug.md</span></span>
+                <span class="sep">·</span>
+                <span>Branch <span class="mono">fix/filter-pill</span></span>
+                <span class="sep">·</span>
+                <span>1 commit, 18 +/3 −</span>
+              </div>
+            </div>
+          </div>
+          <div class="verdict-banner" style="background:var(--green-light);border-color:#b8dbbe;">
+            <div class="verdict-icon" style="background:var(--green-mid);">✓</div>
+            <div>
+              <strong style="color:var(--green-dark);">Bug verified — no longer reproduces.</strong>
+              Regression test added to <span class="mono">tests/ui/filters.test.tsx</span>. Ready to merge.
+            </div>
+          </div>
+        </div>
+
+        <div class="ac-list">
+          <div class="ac-list-header">Verification checks · 3 total</div>
+
+          <div class="ac pass">
+            <div class="ac-head">
+              <div class="ac-status pass">✓</div>
+              <div class="ac-text"><span class="acid">CHK-1</span>Original reproduction case no longer reproduces (resize 1440 → 800 → 1440)</div>
+              <div class="ac-tag pass">Verified</div>
+            </div>
+          </div>
+
+          <div class="ac pass">
+            <div class="ac-head">
+              <div class="ac-status pass">✓</div>
+              <div class="ac-text"><span class="acid">CHK-2</span>Regression test added that fails before the fix and passes after</div>
+              <div class="ac-tag pass">Pass</div>
+            </div>
+          </div>
+
+          <div class="ac pass">
+            <div class="ac-head">
+              <div class="ac-status pass">✓</div>
+              <div class="ac-text"><span class="acid">CHK-3</span>No related filter components show similar layout issues at the same breakpoints</div>
+              <div class="ac-tag pass">Pass</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-bar">
+          <div class="summary">
+            <strong>All checks pass.</strong> Approving merges the PR and closes BUG-892 in ADO.
+          </div>
+          <button class="btn warn">Reopen as not fixed</button>
+          <button class="btn">Re-verify with extra scenario</button>
+          <button class="btn primary">Approve & merge</button>
+        </div>
+
+      </div><!-- /.main-detail bug-892 -->
+
+
+      <!-- ─── Pane: STORY-1190 CSV download (3/3 pass) ─── -->
+      <div class="main-detail" data-item="story-1190">
+
+        <div class="main-header">
+          <div class="main-crumb">
+            <a>Acceptance</a>
+            <span class="sep">›</span>
+            <a>Sprint 23</a>
+            <span class="sep">›</span>
+            <span>STORY-1190</span>
+          </div>
+          <div class="main-title-row">
+            <div class="titlecol">
+              <h2>CSV download remembers last selection</h2>
+              <div class="main-meta">
+                <span><strong>STORY-1190</strong></span>
+                <span class="sep">·</span>
+                <span><span class="mono">docs/specs/csv-memory.story.md</span></span>
+                <span class="sep">·</span>
+                <span>Branch <span class="mono">story/csv-memory</span></span>
+                <span class="sep">·</span>
+                <span>2 commits, 47 +/12 −</span>
+              </div>
+            </div>
+          </div>
+          <div class="verdict-banner" style="background:var(--green-light);border-color:#b8dbbe;">
+            <div class="verdict-icon" style="background:var(--green-mid);">✓</div>
+            <div>
+              <strong style="color:var(--green-dark);">All 3 acceptance criteria pass.</strong>
+              Ready to ship — approving will mark the story closed in ADO.
+            </div>
+          </div>
+        </div>
+
+        <div class="ac-list">
+          <div class="ac-list-header">Acceptance criteria · 3 total</div>
+
+          <div class="ac pass">
+            <div class="ac-head">
+              <div class="ac-status pass">✓</div>
+              <div class="ac-text"><span class="acid">AC-1</span>Last selected columns persist across sessions for the same user</div>
+              <div class="ac-tag pass">Pass</div>
+            </div>
+          </div>
+
+          <div class="ac pass">
+            <div class="ac-head">
+              <div class="ac-status pass">✓</div>
+              <div class="ac-text"><span class="acid">AC-2</span>Selection is scoped per workspace, not global to the user</div>
+              <div class="ac-tag pass">Pass</div>
+            </div>
+          </div>
+
+          <div class="ac pass">
+            <div class="ac-head">
+              <div class="ac-status pass">✓</div>
+              <div class="ac-text"><span class="acid">AC-3</span>A "Reset to defaults" action restores the original column set</div>
+              <div class="ac-tag pass">Pass</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-bar">
+          <div class="summary">
+            <strong>Clean pass.</strong> Approve to close STORY-1190 and ship.
+          </div>
+          <button class="btn warn">Reject</button>
+          <button class="btn primary">Approve & ship</button>
+        </div>
+
+      </div><!-- /.main-detail story-1190 -->
+
+
+      <!-- ─── Pane: DOC-Audit log (Spec ready) ─── -->
+      <div class="main-detail" data-item="doc-audit-log">
+
+        <div class="main-header">
+          <div class="main-crumb">
+            <a>Spec</a>
+            <span class="sep">›</span>
+            <a>Sprint 24 backlog</a>
+            <span class="sep">›</span>
+            <span>Audit log retention</span>
+          </div>
+          <div class="main-title-row">
+            <div class="titlecol">
+              <h2>Audit log retention rules</h2>
+              <div class="main-meta">
+                <span><strong>FEAT-draft</strong></span>
+                <span class="sep">·</span>
+                <span><span class="mono">docs/specs/audit-log-retention.feature.md</span></span>
+                <span class="sep">·</span>
+                <span>4 ACs validated</span>
+                <span class="sep">·</span>
+                <span>4 stories planned</span>
+              </div>
+            </div>
+          </div>
+          <div class="verdict-banner">
+            <div class="verdict-icon">✓</div>
+            <div>
+              <strong>Spec validated, ready for kickoff.</strong>
+              Sending will run <span class="mono">/spec-to-issues → /kickoff</span>: create 4 ADO stories and start agents on the first 2 in parallel.
+            </div>
+          </div>
+        </div>
+
+        <div class="ac-list">
+          <div class="ac-list-header">Planned stories · 4 total</div>
+
+          <div class="ac pass">
+            <div class="ac-head">
+              <div class="ac-status" style="background:var(--olive);color:#fff;">1</div>
+              <div class="ac-text">
+                <strong>Implement nightly purge job</strong>
+                <div style="font-size:0.78rem;color:var(--gray-600);margin-top:2px;">2 ACs · ~1 day · agent-suitable</div>
+              </div>
+              <div class="ac-tag" style="background:var(--olive-light);color:var(--olive);">Story</div>
+            </div>
+          </div>
+
+          <div class="ac pass">
+            <div class="ac-head">
+              <div class="ac-status" style="background:var(--olive);color:#fff;">2</div>
+              <div class="ac-text">
+                <strong>Retention settings UI for admins</strong>
+                <div style="font-size:0.78rem;color:var(--gray-600);margin-top:2px;">1 AC · ~half day · agent-suitable</div>
+              </div>
+              <div class="ac-tag" style="background:var(--olive-light);color:var(--olive);">Story</div>
+            </div>
+          </div>
+
+          <div class="ac pass">
+            <div class="ac-head">
+              <div class="ac-status" style="background:var(--olive);color:#fff;">3</div>
+              <div class="ac-text">
+                <strong>Hard-delete enforcement (no soft-delete)</strong>
+                <div style="font-size:0.78rem;color:var(--gray-600);margin-top:2px;">1 AC · ~1 day · agent-suitable</div>
+              </div>
+              <div class="ac-tag" style="background:var(--olive-light);color:var(--olive);">Story</div>
+            </div>
+          </div>
+
+          <div class="ac pass">
+            <div class="ac-head">
+              <div class="ac-status" style="background:var(--olive);color:#fff;">4</div>
+              <div class="ac-text">
+                <strong>Read-path performance during purge</strong>
+                <div style="font-size:0.78rem;color:var(--gray-600);margin-top:2px;">1 AC · ~half day · needs perf test harness</div>
+              </div>
+              <div class="ac-tag" style="background:var(--olive-light);color:var(--olive);">Story</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-bar">
+          <div class="summary">
+            <strong>Ready to send.</strong> Two stories will start in parallel; the others queue behind them.
+          </div>
+          <button class="btn">Edit spec</button>
+          <button class="btn">Preview ADO items</button>
+          <button class="btn primary">Send to agents</button>
+        </div>
+
+      </div><!-- /.main-detail doc-audit-log -->
+
+
+      <!-- ─── Pane: FEAT-1195 Bulk role (2/4 pass) ─── -->
+      <div class="main-detail" data-item="feat-1195">
+
+        <div class="main-header">
+          <div class="main-crumb">
+            <a>Acceptance</a>
+            <span class="sep">›</span>
+            <a>Sprint 23</a>
+            <span class="sep">›</span>
+            <span>FEAT-1195</span>
+          </div>
+          <div class="main-title-row">
+            <div class="titlecol">
+              <h2>Bulk role assignment in admin panel</h2>
+              <div class="main-meta">
+                <span><strong>FEAT-1195</strong></span>
+                <span class="sep">·</span>
+                <span><span class="mono">docs/specs/bulk-role-assignment.feature.md</span></span>
+                <span class="sep">·</span>
+                <span>Branch <span class="mono">feat/bulk-roles</span></span>
+                <span class="sep">·</span>
+                <span>5 commits, 234 +/19 −</span>
+              </div>
+            </div>
+          </div>
+          <div class="verdict-banner" style="background:var(--red-light);border-color:#e3b8a8;">
+            <div class="verdict-icon" style="background:var(--red-mid);">!</div>
+            <div>
+              <strong style="color:var(--red-mid);">2 of 4 acceptance criteria pass.</strong>
+              Two failures cluster on the same theme — permission scoping. Likely a single underlying spec issue.
+            </div>
+          </div>
+        </div>
+
+        <div class="ac-list">
+          <div class="ac-list-header">Acceptance criteria · 4 total</div>
+
+          <div class="ac pass">
+            <div class="ac-head">
+              <div class="ac-status pass">✓</div>
+              <div class="ac-text"><span class="acid">AC-1</span>Admin can select multiple users via checkbox column in user list</div>
+              <div class="ac-tag pass">Pass</div>
+            </div>
+          </div>
+
+          <div class="ac fail">
+            <div class="ac-head">
+              <div class="ac-status fail">✕</div>
+              <div class="ac-text"><span class="acid">AC-2</span>Bulk role change respects existing permission boundaries (org admin cannot grant tenant admin)</div>
+              <div class="ac-tag fail">Fail</div>
+            </div>
+            <div class="ac-body">
+              <div class="ac-evidence-label">Evidence — automated check</div>
+              <div class="ac-evidence">
+<span class="muted">// test: org_admin_blocked_from_granting_tenant_admin</span><br>
+<span class="muted">request:</span> POST /api/users/bulk-role  (auth: org_admin)<br>
+<span class="muted">expected:</span> 403 Forbidden<br>
+<span class="fail-line">actual:&nbsp;&nbsp; 200 OK, 12 users updated to tenant_admin</span>
+              </div>
+              <div class="ac-cause">
+                <span class="ac-cause-label">Likely cause:</span>
+                <span>The bulk endpoint uses the basic role-check decorator instead of the hierarchical guard. <span class="mono">routes/admin/bulk_roles.py:24</span> needs the same scoping the single-user endpoint uses.</span>
+              </div>
+              <div class="ac-actions">
+                <button class="ac-action primary">Revise spec & re-run</button>
+                <button class="ac-action">Tag dev (technical blocker)</button>
+                <button class="ac-action">View test in repo</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ac fail">
+            <div class="ac-head">
+              <div class="ac-status fail">✕</div>
+              <div class="ac-text"><span class="acid">AC-3</span>Audit log records the bulk action with each individual user-role pair</div>
+              <div class="ac-tag fail">Fail</div>
+            </div>
+            <div class="ac-body">
+              <div class="ac-evidence-label">Evidence</div>
+              <div class="ac-evidence">
+<span class="muted">expected:</span> 12 audit_log rows<br>
+<span class="fail-line">actual:&nbsp;&nbsp; 1 audit_log row with batch_id, individual user list missing</span>
+              </div>
+              <div class="ac-cause">
+                <span class="ac-cause-label">Likely cause:</span>
+                <span>Implementation logged the batch as a single event for performance. Spec didn't explicitly require per-user rows — ambiguity.</span>
+              </div>
+              <div class="ac-actions">
+                <button class="ac-action primary">Revise spec & re-run</button>
+                <button class="ac-action">Accept (granularity is fine)</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ac pass">
+            <div class="ac-head">
+              <div class="ac-status pass">✓</div>
+              <div class="ac-text"><span class="acid">AC-4</span>Operation is atomic — partial failure rolls back all changes</div>
+              <div class="ac-tag pass">Pass</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-bar">
+          <div class="summary">
+            <strong>Two failures, both spec-related.</strong> Recommend revising the spec to clarify scope and audit-log granularity, then re-running.
+          </div>
+          <button class="btn warn">Reject</button>
+          <button class="btn">Approve passing only</button>
+          <button class="btn primary">Revise spec & re-run</button>
+        </div>
+
+      </div><!-- /.main-detail feat-1195 -->
+
+
+      <!-- ─── Pane: BUG-901 Date picker (awaiting kickoff) ─── -->
+      <div class="main-detail" data-item="bug-901">
+
+        <div class="main-header">
+          <div class="main-crumb">
+            <a>Bug</a>
+            <span class="sep">›</span>
+            <a>Inbox</a>
+            <span class="sep">›</span>
+            <span>BUG-901</span>
+          </div>
+          <div class="main-title-row">
+            <div class="titlecol">
+              <h2>Date picker timezone off by one</h2>
+              <div class="main-meta">
+                <span><strong>BUG-901</strong></span>
+                <span class="sep">·</span>
+                <span><span class="mono">docs/bugs/date-picker-tz.bug.md</span></span>
+                <span class="sep">·</span>
+                <span>Filed 4h ago by <strong>customer support</strong></span>
+                <span class="sep">·</span>
+                <span>Severity: medium</span>
+              </div>
+            </div>
+          </div>
+          <div class="verdict-banner" style="background:var(--gray-100);border-color:var(--gray-200);">
+            <div class="verdict-icon" style="background:var(--gray-500);">·</div>
+            <div>
+              <strong>Bug filed and validated.</strong> Awaiting agent kickoff — sending will run <span class="mono">/kickoff</span> against an available agent.
+            </div>
+          </div>
+        </div>
+
+        <div class="ac-list">
+          <div class="ac-list-header">Bug report</div>
+
+          <div class="ac pass">
+            <div class="ac-head" style="background:var(--gray-50);">
+              <div class="ac-status" style="background:var(--gray-500);color:#fff;font-size:0.7rem;">1</div>
+              <div class="ac-text">
+                <strong>Reproduction</strong>
+                <div style="font-size:0.82rem;color:var(--gray-700);margin-top:6px;line-height:1.6;">
+                  1. Set browser timezone to America/Los_Angeles<br>
+                  2. Open the cohort builder, click the "Start date" picker<br>
+                  3. Select Aug 15, click apply<br>
+                  4. The selected date displays as Aug 14 in the filter pill
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ac pass">
+            <div class="ac-head" style="background:var(--gray-50);">
+              <div class="ac-status" style="background:var(--gray-500);color:#fff;font-size:0.7rem;">2</div>
+              <div class="ac-text">
+                <strong>Expected behavior</strong>
+                <div style="font-size:0.82rem;color:var(--gray-700);margin-top:6px;">Selected date is preserved exactly across the picker → pill → query path, regardless of browser timezone.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ac pass">
+            <div class="ac-head" style="background:var(--gray-50);">
+              <div class="ac-status" style="background:var(--gray-500);color:#fff;font-size:0.7rem;">3</div>
+              <div class="ac-text">
+                <strong>Suggested scope</strong>
+                <div style="font-size:0.82rem;color:var(--gray-700);margin-top:6px;line-height:1.55;">
+                  Likely a UTC conversion bug in the picker → state handoff. Agent should add a regression test that exercises three non-UTC timezones (LA, Tokyo, Sydney).
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-bar">
+          <div class="summary">
+            <strong>Ready for agent.</strong> Estimated ~2h from kickoff to <span class="mono">/verify-fix</span> report.
+          </div>
+          <button class="btn">Edit report</button>
+          <button class="btn">Reassign to dev</button>
+          <button class="btn primary">Send to agent</button>
+        </div>
+
+      </div><!-- /.main-detail bug-901 -->
+
+
+      <!-- ─── Pane: STORY-1156 Sticky headers (2/2 pass) ─── -->
+      <div class="main-detail" data-item="story-1156">
+
+        <div class="main-header">
+          <div class="main-crumb">
+            <a>Acceptance</a>
+            <span class="sep">›</span>
+            <a>Sprint 23</a>
+            <span class="sep">›</span>
+            <span>STORY-1156</span>
+          </div>
+          <div class="main-title-row">
+            <div class="titlecol">
+              <h2>Sticky table headers in long reports</h2>
+              <div class="main-meta">
+                <span><strong>STORY-1156</strong></span>
+                <span class="sep">·</span>
+                <span><span class="mono">docs/specs/sticky-headers.story.md</span></span>
+                <span class="sep">·</span>
+                <span>Branch <span class="mono">story/sticky-headers</span></span>
+                <span class="sep">·</span>
+                <span>1 commit, 24 +/2 −</span>
+              </div>
+            </div>
+          </div>
+          <div class="verdict-banner" style="background:var(--green-light);border-color:#b8dbbe;">
+            <div class="verdict-icon" style="background:var(--green-mid);">✓</div>
+            <div>
+              <strong style="color:var(--green-dark);">All 2 acceptance criteria pass.</strong>
+              Approving will close STORY-1156 and merge.
+            </div>
+          </div>
+        </div>
+
+        <div class="ac-list">
+          <div class="ac-list-header">Acceptance criteria · 2 total</div>
+
+          <div class="ac pass">
+            <div class="ac-head">
+              <div class="ac-status pass">✓</div>
+              <div class="ac-text"><span class="acid">AC-1</span>Column headers remain visible while scrolling tables longer than the viewport</div>
+              <div class="ac-tag pass">Pass</div>
+            </div>
+          </div>
+
+          <div class="ac pass">
+            <div class="ac-head">
+              <div class="ac-status pass">✓</div>
+              <div class="ac-text"><span class="acid">AC-2</span>Sticky headers respect frozen-column positioning when both are enabled</div>
+              <div class="ac-tag pass">Pass</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-bar">
+          <div class="summary">
+            <strong>Clean pass.</strong> Approve to close and merge.
+          </div>
+          <button class="btn warn">Reject</button>
+          <button class="btn primary">Approve & merge</button>
+        </div>
+
+      </div><!-- /.main-detail story-1156 -->
+
+    </div>
+
+    <!-- RIGHT: Sprint health + in-flight -->
+    <div class="rail">
+
+      <div class="rail-section">
+        <h4>Sprint health <a>graduation →</a></h4>
+
+        <div class="metric">
+          <div class="metric-row1">
+            <span class="metric-name">AC Pass Rate</span>
+            <span class="metric-value green">78%</span>
+          </div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill green" style="width:78%;"></div>
+            <div class="metric-target-marker" style="left:70%;" title="L3 target: 70%"></div>
+          </div>
+          <div class="metric-foot">
+            <span>L3 target: &gt;70%</span>
+            <span style="color:var(--green-mid);font-weight:600;">↑ on track</span>
+          </div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-row1">
+            <span class="metric-name">Escape Rate</span>
+            <span class="metric-value green">12%</span>
+          </div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill green" style="width:12%;"></div>
+            <div class="metric-target-marker" style="left:20%;"></div>
+          </div>
+          <div class="metric-foot">
+            <span>L3 target: &lt;20%</span>
+            <span style="color:var(--green-mid);font-weight:600;">↓ improving</span>
+          </div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-row1">
+            <span class="metric-name">Regression Rate</span>
+            <span class="metric-value green">6%</span>
+          </div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill green" style="width:6%;"></div>
+            <div class="metric-target-marker" style="left:10%;"></div>
+          </div>
+          <div class="metric-foot">
+            <span>L3 target: &lt;10%</span>
+            <span>steady</span>
+          </div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-row1">
+            <span class="metric-name">Critic Pass Rate</span>
+            <span class="metric-value olive">68%</span>
+          </div>
+          <div class="metric-bar-track">
+            <div class="metric-bar-fill olive" style="width:68%;"></div>
+            <div class="metric-target-marker" style="left:70%;"></div>
+          </div>
+          <div class="metric-foot">
+            <span>L3 target: &gt;70%</span>
+            <span style="color:var(--olive);font-weight:600;">2 pts under</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="rail-section">
+        <h4>Agents in flight <a>4 →</a></h4>
+
+        <div class="inflight-item">
+          <div class="inflight-row1">
+            <span class="agent-dot pulse"></span>
+            <span class="inflight-title">Audit log retention rules</span>
+          </div>
+          <div class="inflight-status">Building · 2 of 4 stories</div>
+          <div class="inflight-progress">
+            <div class="inflight-progress-fill" style="width:48%;"></div>
+          </div>
+        </div>
+
+        <div class="inflight-item">
+          <div class="inflight-row1">
+            <span class="agent-dot pulse"></span>
+            <span class="inflight-title">Date picker timezone fix</span>
+          </div>
+          <div class="inflight-status">Tests running · regression added</div>
+          <div class="inflight-progress">
+            <div class="inflight-progress-fill" style="width:82%;"></div>
+          </div>
+        </div>
+
+        <div class="inflight-item">
+          <div class="inflight-row1">
+            <span class="agent-dot pulse"></span>
+            <span class="inflight-title">Saved filter rename</span>
+          </div>
+          <div class="inflight-status">Drafting PR description</div>
+          <div class="inflight-progress">
+            <div class="inflight-progress-fill" style="width:91%;"></div>
+          </div>
+        </div>
+
+        <div class="inflight-item">
+          <div class="inflight-row1">
+            <span class="agent-dot"></span>
+            <span class="inflight-title">Cohort builder pagination</span>
+          </div>
+          <div class="inflight-status">Queued · waiting on /kickoff</div>
+        </div>
+      </div>
+
+      <div class="rail-section">
+        <h4>End of day</h4>
+        <div style="font-size:0.82rem;color:var(--gray-700);line-height:1.55;margin-bottom:10px;">
+          When you're ready, run <span class="mono" style="background:var(--gray-150);padding:1px 6px;border-radius:3px;font-size:0.78rem;">/sprint-report</span> to draft today's stakeholder summary from closed items.
+        </div>
+        <button class="btn primary" style="width:100%;font-size:0.82rem;">Run /sprint-report</button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- Annotations under cockpit -->
+<div class="annotations">
+  <div class="anno">
+    <span class="anno-num">1</span>
+    <strong>Queue, not inbox.</strong> The left rail isn't email — it's a typed queue. Each item knows what command produced it (<span class="mono" style="font-size:0.72rem;">/accept</span>, <span class="mono" style="font-size:0.72rem;">/verify-fix</span>) and what action it's waiting for.
+  </div>
+  <div class="anno">
+    <span class="anno-num">2</span>
+    <strong>Verdicts replace clicking through.</strong> The center pane is the L3→L4 shift: per-AC pass/fail with evidence and a likely-cause hint. The PM never has to open the product to spot-check.
+  </div>
+  <div class="anno">
+    <span class="anno-num">3</span>
+    <strong>Sprint health on every screen.</strong> The right rail keeps the four graduation metrics in peripheral vision so the PM notices drift without having to ask for a report.
+  </div>
+</div>
+
+
+<!-- ───────── VIEW 2: Spec validation ───────── -->
+<div class="view-label" id="view-2">
+  <span class="num">View 2</span>
+  <span class="title">Spec Validation Gate</span>
+  <span class="sub">— what <span class="mono">/validate-spec</span> looks like at L4: side-by-side AC translation, agents can't start until every AC is approved</span>
+</div>
+
+<div class="spec-shell">
+
+  <div class="spec-topbar">
+    <span style="font-size:0.78rem;color:var(--gray-500);font-weight:600;letter-spacing:.05em;text-transform:uppercase;">Spec validation</span>
+    <span class="filename">docs/specs/audit-log-retention.feature.md</span>
+    <div style="flex:1;"></div>
+    <span class="ph2">Phase 2 · L4</span>
+    <span class="gate">Gate · agents waiting</span>
+  </div>
+
+  <div class="spec-body">
+
+    <!-- LEFT: Original natural-language ACs -->
+    <div class="spec-col">
+      <h3>Natural language</h3>
+      <div class="author"><strong>You wrote</strong> · 4 ACs · 9:14 AM</div>
+
+      <div class="spec-original">
+        <div class="spec-original-ac">
+          <div class="label">AC-1</div>
+          <div>Audit logs older than 90 days are automatically deleted unless the tenant has opted into extended retention.</div>
+        </div>
+        <div class="spec-original-ac">
+          <div class="label">AC-2</div>
+          <div>An admin can see how many records will be deleted in the next purge cycle.</div>
+        </div>
+        <div class="spec-original-ac">
+          <div class="label">AC-3</div>
+          <div>Deleted records cannot be recovered.</div>
+        </div>
+        <div class="spec-original-ac">
+          <div class="label">AC-4</div>
+          <div>The purge job runs without taking the system down.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Verified ACs -->
+    <div class="spec-col">
+      <h3>Verifiable form</h3>
+      <div class="author"><strong>Translated by /validate-spec</strong> · review each before kickoff</div>
+
+      <div class="verified-ac approved" data-ac="AC-1">
+        <div class="verified-ac-head">
+          <span class="verified-ac-id">AC-1</span>
+          <span class="verified-ac-state approved">Approved</span>
+          <span class="verified-ac-arrow">9:18 AM</span>
+        </div>
+        <div class="verified-ac-content">
+          GIVEN an audit_log row with created_at &lt; now() − 90 days<br>
+          AND tenant.retention_policy != 'extended'<br>
+          WHEN the nightly purge job runs<br>
+          THEN the row is deleted within one purge cycle
+        </div>
+      </div>
+
+      <div class="verified-ac editing" data-ac="AC-2">
+        <div class="verified-ac-head">
+          <span class="verified-ac-id">AC-2</span>
+          <span class="verified-ac-state editing">Editing</span>
+          <span class="verified-ac-arrow">needs scope decision</span>
+        </div>
+        <div class="verified-ac-content">
+          GIVEN an admin viewing the Retention Settings page<br>
+          WHEN they open the "Next purge" panel<br>
+          THEN the panel shows a count of rows scheduled for deletion in the next 24h<br>
+          <span style="color:var(--olive);">// flagged: "an admin" — does this include billing admins, or only data-governance admins?</span>
+        </div>
+        <div class="verified-ac-actions">
+          <button class="vac-btn primary" data-action="approve">Approve as-is</button>
+          <button class="vac-btn" data-action="edit">Edit</button>
+          <button class="vac-btn" data-action="sendback">Send back to spec</button>
+        </div>
+      </div>
+
+      <div class="verified-ac" data-ac="AC-3">
+        <div class="verified-ac-head">
+          <span class="verified-ac-id">AC-3</span>
+          <span class="verified-ac-state pending">Pending review</span>
+          <span class="verified-ac-arrow">2 candidate translations</span>
+        </div>
+        <div class="verified-ac-content" style="color:var(--gray-600);">
+          GIVEN a row deleted by the purge job<br>
+          WHEN any user (including platform admin) attempts retrieval through the API<br>
+          THEN no record is returned and no soft-deleted row exists in storage
+        </div>
+      </div>
+
+      <div class="verified-ac" data-ac="AC-4">
+        <div class="verified-ac-head">
+          <span class="verified-ac-id">AC-4</span>
+          <span class="verified-ac-state pending">Pending review</span>
+          <span class="verified-ac-arrow">needs threshold</span>
+        </div>
+        <div class="verified-ac-content" style="color:var(--gray-600);">
+          // "without taking the system down" needs a measurable threshold —<br>
+          // suggest: read-path p95 latency stays under 200ms during purge window
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="spec-foot">
+    <div class="progress"><strong>1 of 4 approved.</strong> Agents are blocked until every AC is approved or sent back.</div>
+    <div class="gate-msg">Kickoff disabled →</div>
+    <button class="btn" disabled style="opacity:0.5;cursor:not-allowed;">Run /kickoff</button>
+  </div>
+
+</div>
+
+<!-- Annotations under spec view -->
+<div class="annotations">
+  <div class="anno">
+    <span class="anno-num">4</span>
+    <strong>The translation is the gate.</strong> Side-by-side keeps the PM's intent visible while they review the verifiable form. Ambiguity gets surfaced (AC-2's "an admin"), not silently resolved by an agent.
+  </div>
+  <div class="anno">
+    <span class="anno-num">5</span>
+    <strong>One AC at a time.</strong> Approve / Edit / Send back. The PM never has to write Gherkin from scratch — they react to a draft, which is faster and produces less drift than authoring.
+  </div>
+  <div class="anno">
+    <span class="anno-num">6</span>
+    <strong>Hard gate, soft cost.</strong> Kickoff is disabled until every AC is approved. Adds maybe 10 minutes to spec time; removes the manual spot-checking that L3 still requires.
+  </div>
+</div>
+
+<!-- ───────── VIEW 3: Contextual button patterns ───────── -->
+<div class="view-label" id="view-3">
+  <span class="num">View 3</span>
+  <span class="title">Contextual Action Patterns</span>
+  <span class="sub">— same queue, different items, different buttons. Item type and state determine which actions appear.</span>
+</div>
+
+<div class="contextual-grid">
+
+  <!-- Card 1: Failed AC -->
+  <div class="ctx-card">
+    <div class="ctx-header">
+      <div class="qi-icon feat">F</div>
+      <div class="ctx-header-body">
+        <div class="ctx-title">Multi-tenant export</div>
+        <div class="ctx-meta">FEAT-1208 · 5 of 6 ACs pass</div>
+      </div>
+      <div class="ctx-state fail">Needs triage</div>
+    </div>
+    <div class="ctx-explain">
+      One AC failed with a likely-cause hint pointing at spec ambiguity. The PM has three real choices:
+      tighten the spec and let agents re-run, accept the gap with an ADO comment, or escalate
+      because it's a technical blocker beyond the agent.
+    </div>
+    <div class="ctx-actions">
+      <button class="ctx-btn primary">
+        <span class="ctx-btn-label">Revise spec & re-run</span>
+        <span class="ctx-btn-cmd">/validate-spec → /kickoff</span>
+      </button>
+      <button class="ctx-btn">
+        <span class="ctx-btn-label">Accept gap, comment in ADO</span>
+        <span class="ctx-btn-cmd">comment via ADO API · creates follow-up story</span>
+      </button>
+      <button class="ctx-btn">
+        <span class="ctx-btn-label">Tag dev — technical blocker</span>
+        <span class="ctx-btn-cmd">@-mention in ADO · removes from agent queue</span>
+      </button>
+      <button class="ctx-btn ghost">View failing test in repo →</button>
+    </div>
+    <div class="ctx-was-disabled">
+      <strong>Earlier:</strong> "Approve & ship" was visible while reports were still arriving.
+      It disappeared once the failing AC came in — the action no longer fits the state.
+    </div>
+  </div>
+
+  <!-- Card 2: Spec ready, agents idle -->
+  <div class="ctx-card">
+    <div class="ctx-header">
+      <div class="qi-icon spec">D</div>
+      <div class="ctx-header-body">
+        <div class="ctx-title">Audit log retention rules</div>
+        <div class="ctx-meta">4 ACs validated · 4 stories planned</div>
+      </div>
+      <div class="ctx-state ready">Ready to kick off</div>
+    </div>
+    <div class="ctx-explain">
+      Every AC is approved. Issue creation and agent kickoff are usually two commands run
+      back-to-back, so the cockpit collapses them into one. The underlying commands stay
+      visible — power users can still run them individually.
+    </div>
+    <div class="ctx-actions">
+      <button class="ctx-btn primary">
+        <span class="ctx-btn-label">Send to agents</span>
+        <span class="ctx-btn-cmd">/spec-to-issues → /kickoff</span>
+      </button>
+      <button class="ctx-btn">
+        <span class="ctx-btn-label">Preview planned stories</span>
+        <span class="ctx-btn-cmd">dry-run /spec-to-issues · no side effects</span>
+      </button>
+      <button class="ctx-btn">
+        <span class="ctx-btn-label">Edit spec</span>
+        <span class="ctx-btn-cmd">opens docs/specs/audit-log.feature.md</span>
+      </button>
+      <button class="ctx-btn ghost">Discard draft →</button>
+    </div>
+    <div class="ctx-was-disabled">
+      <strong>Earlier today:</strong> "Send to agents" was disabled — 2 of 4 ACs hadn't passed
+      validation yet. The button explained why instead of just being absent.
+    </div>
+  </div>
+
+  <!-- Card 3: Bug verified -->
+  <div class="ctx-card">
+    <div class="ctx-header">
+      <div class="qi-icon bug">B</div>
+      <div class="ctx-header-body">
+        <div class="ctx-title">Filter pill collapses on resize</div>
+        <div class="ctx-meta">BUG-892 · regression test added · all green</div>
+      </div>
+      <div class="ctx-state pass">Verified</div>
+    </div>
+    <div class="ctx-explain">
+      The bug no longer reproduces and a regression test was added — the L3 bar for "fixed."
+      Approve merges the PR. Re-verify exists for cases where the PM wants an additional
+      scenario covered before shipping.
+    </div>
+    <div class="ctx-actions">
+      <button class="ctx-btn primary">
+        <span class="ctx-btn-label">Approve & merge</span>
+        <span class="ctx-btn-cmd">approves PR · runs ADO close</span>
+      </button>
+      <button class="ctx-btn">
+        <span class="ctx-btn-label">Re-verify with extra scenario</span>
+        <span class="ctx-btn-cmd">/verify-fix --add-scenario</span>
+      </button>
+      <button class="ctx-btn ghost">View regression test →</button>
+      <button class="ctx-btn ghost">Reopen as not-fixed →</button>
+    </div>
+    <div class="ctx-was-disabled">
+      <strong>Earlier:</strong> "Approve & merge" was disabled until <span class="mono" style="font-size:0.7rem;">/verify-fix</span>
+      reported VERIFIED. A fix without a regression test would have kept it locked.
+    </div>
+  </div>
+
+</div>
+
+<!-- Annotations under view 3 -->
+<div class="annotations">
+  <div class="anno">
+    <span class="anno-num">7</span>
+    <strong>The buttons are derived, not configured.</strong> Item type plus state plus available evidence equals action set. Three queue items, three different sets — and the PM never had to learn which command applies when.
+  </div>
+  <div class="anno">
+    <span class="anno-num">8</span>
+    <strong>Slash commands stay underneath.</strong> Every button shows the underlying command in mono — visible affordance for power users and agents, but not the PM's primary path. Like Git → GitHub: composability preserved, friction removed.
+  </div>
+  <div class="anno">
+    <span class="anno-num">9</span>
+    <strong>Disabled states explain themselves.</strong> A button that can't run yet stays visible with the prerequisite spelled out. The PM sees <em>why</em> they can't act, not just an empty space — and so they know what to do to unblock.
+  </div>
+</div>
+
+
+<!-- ───────── VIEW 4: Preview-and-confirm flow ───────── -->
+<div class="view-label" id="view-4">
+  <span class="num">View 4</span>
+  <span class="title">Preview-and-Confirm: <span class="mono" style="font-size:0.95rem;">/sprint-report</span></span>
+  <span class="sub">— end-of-day flow. Generated draft, edited inline, sent to chosen destinations. Three steps, one panel.</span>
+</div>
+
+<div class="preview-shell">
+
+  <div class="preview-header">
+    <div>
+      <div class="preview-eyebrow">Sprint report · draft ready</div>
+      <h3>Sprint 23 — Day 14 of 14</h3>
+      <div class="preview-sub">
+        Generated from 23 closed ADO items, 4 acceptance reports, 6 verified bugs · escapes grouped by failure category · 12 sec ago
+      </div>
+    </div>
+    <div class="preview-step-indicator">
+      <span class="step done">1. Generate</span>
+      <span class="arrow">›</span>
+      <span class="step current">2. Edit</span>
+      <span class="arrow">›</span>
+      <span class="step">3. Send</span>
+    </div>
+  </div>
+
+  <div class="preview-body">
+
+    <!-- Section 1: What shipped -->
+    <div class="preview-section">
+      <div class="preview-section-head">
+        <h4>What shipped</h4>
+        <span class="preview-source">23 closed items</span>
+        <button class="edit-btn">✎ Edit</button>
+      </div>
+      <div class="preview-section-body">
+        <p>Six features and six bug fixes shipped this sprint. The headline work was
+        <strong>multi-tenant export with row-level isolation</strong> (FEAT-1208) — landed with one
+        accepted gap on cross-tenant URL parameters, now tracked as STORY-1244 for sprint 24.
+        <strong>Audit log retention rules</strong> and <strong>CSV download memory</strong> both reached
+        production. The <strong>bulk role assignment</strong> work was de-scoped to two of four ACs
+        after a triage call mid-sprint.</p>
+      </div>
+    </div>
+
+    <!-- Section 2: Currently editing -->
+    <div class="preview-section editing">
+      <div class="preview-section-head">
+        <h4>What was blocked</h4>
+        <span class="preview-source">tasks/escapes/ · grouped by category</span>
+        <span class="editing-tag">Editing</span>
+      </div>
+      <div class="preview-section-body">
+        <p>Three escapes this sprint, grouped by the standardized failure schema:</p>
+        <ul>
+          <li><strong>Spec ambiguity (2):</strong> AC-3 of multi-tenant export and AC-2 of bulk role
+          assignment both surfaced unspecified paths after agents had started. Both have follow-up
+          stories in sprint 24's backlog.</li>
+          <li><strong>Tool failure (1):</strong> Cohort builder pagination hit a Databricks rate limit
+          during integration tests. <span class="editable-mark">Platform team is sizing a quota bump — ETA next sprint.</span></li>
+        </ul>
+        <p style="margin-top:8px;color:var(--olive);font-size:0.82rem;">
+          ↑ The highlighted clause is your manual addition — auto-draft didn't have visibility into the platform team's status.
+        </p>
+      </div>
+    </div>
+
+    <!-- Section 3: Quality health -->
+    <div class="preview-section">
+      <div class="preview-section-head">
+        <h4>Quality health</h4>
+        <span class="preview-source">graduation metrics · sprint avg</span>
+        <button class="edit-btn">✎ Edit</button>
+      </div>
+      <div class="preview-section-body">
+        <div class="preview-metrics">
+          <div class="pmetric">
+            <div class="pmetric-name">AC Pass Rate</div>
+            <div class="pmetric-value">78%</div>
+            <div class="pmetric-target">L3 target: &gt;70% ✓</div>
+          </div>
+          <div class="pmetric">
+            <div class="pmetric-name">Escape Rate</div>
+            <div class="pmetric-value">12%</div>
+            <div class="pmetric-target">L3 target: &lt;20% ✓</div>
+          </div>
+          <div class="pmetric">
+            <div class="pmetric-name">Regression Rate</div>
+            <div class="pmetric-value">6%</div>
+            <div class="pmetric-target">L3 target: &lt;10% ✓</div>
+          </div>
+          <div class="pmetric">
+            <div class="pmetric-name">Critic Pass</div>
+            <div class="pmetric-value olive">68%</div>
+            <div class="pmetric-target">L3 target: &gt;70% · 2 pts under</div>
+          </div>
+        </div>
+        <p style="margin-top:12px;font-size:0.85rem;">Three of four metrics meet or beat L3 thresholds. Critic Pass Rate
+        sits 2 points under target — second sprint in that range; worth a look if it doesn't recover next sprint.</p>
+      </div>
+    </div>
+
+    <!-- Section 4: Next sprint -->
+    <div class="preview-section">
+      <div class="preview-section-head">
+        <h4>Next sprint preview</h4>
+        <span class="preview-source">backlog · not yet committed</span>
+        <button class="edit-btn">✎ Edit</button>
+      </div>
+      <div class="preview-section-body">
+        <p>Backlog for sprint 24 is sized at roughly 110% of this sprint's velocity — two follow-up
+        stories from accepted gaps, plus the audit log purge job, plus two bugs filed this morning.
+        Final commit lands at sprint planning Monday.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="preview-foot">
+    <div class="preview-dest">
+      <div class="dest-label">Send to</div>
+      <div class="dest-chips">
+        <label class="dest-chip checked">
+          <span class="chip-mark">✓</span>
+          Slack · #product-updates
+        </label>
+        <label class="dest-chip checked">
+          <span class="chip-mark">✓</span>
+          Email · leadership distro
+        </label>
+        <label class="dest-chip checked">
+          <span class="chip-mark">✓</span>
+          ADO · sprint 23 retro thread
+        </label>
+        <label class="dest-chip">
+          <span class="chip-mark">+</span>
+          Slack · #leadership-eng
+        </label>
+        <label class="dest-chip">
+          <span class="chip-mark">+</span>
+          Add destination
+        </label>
+      </div>
+    </div>
+    <div class="preview-actions">
+      <button class="btn">Save as draft</button>
+      <button class="btn primary">Send to 3 destinations</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Annotations under view 4 -->
+<div class="annotations">
+  <div class="anno">
+    <span class="anno-num">10</span>
+    <strong>Generated, then edited.</strong> The escape categories ("2 spec ambiguity, 1 tool failure") come from your standardized failure schema, not free text. The PM only writes the things the auto-draft can't know — like the platform team's quota status.
+  </div>
+  <div class="anno">
+    <span class="anno-num">11</span>
+    <strong>Three steps, one panel.</strong> Generate → Edit → Send is the same flow for every "PM produces something for stakeholders" command — release notes, sprint reports, post-mortems. Same panel shape, different content sources.
+  </div>
+  <div class="anno">
+    <span class="anno-num">12</span>
+    <strong>Destinations are explicit.</strong> Where the report goes is a checkbox decision in front of the PM, not a config buried somewhere. Different sprints want different audiences — and "send to 3 destinations" makes the blast radius unmistakable before they click.
+  </div>
+</div>
+
+<div class="footer">
+  PM Cockpit — Prototype concept &nbsp;·&nbsp; companion to the PM Workflow Maturity Model &nbsp;·&nbsp; 2026-04-26 &nbsp;·&nbsp; Internal
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ─────────────────────────────────────────────────────
+  // VIEW 1: Queue → pane swap + AC expand/collapse
+  // ─────────────────────────────────────────────────────
+
+  const queueItems = document.querySelectorAll('.qi[data-item]');
+  const detailPanes = document.querySelectorAll('.main-detail');
+
+  queueItems.forEach(qi => {
+    qi.addEventListener('click', () => {
+      const id = qi.dataset.item;
+
+      queueItems.forEach(q => q.classList.remove('selected'));
+      qi.classList.add('selected');
+
+      // Brief flash to acknowledge click
+      qi.classList.remove('flashed');
+      void qi.offsetWidth; // force reflow to re-trigger animation
+      qi.classList.add('flashed');
+
+      detailPanes.forEach(d => d.classList.remove('active'));
+      const target = document.querySelector('.main-detail[data-item="' + id + '"]');
+      if (target) {
+        target.classList.add('active');
+        // scroll AC list to top when switching
+        const list = target.querySelector('.ac-list');
+        if (list) list.scrollTop = 0;
+      }
+    });
+  });
+
+  // AC expand/collapse — click the head of any AC that has an .ac-body
+  document.querySelectorAll('.main .ac').forEach(ac => {
+    const head = ac.querySelector('.ac-head');
+    const body = ac.querySelector('.ac-body');
+    if (!head || !body) return; // pass-only ACs have no body
+    head.style.cursor = 'pointer';
+    head.addEventListener('click', (e) => {
+      // don't toggle when clicking buttons inside an expanded body
+      if (e.target.closest('.ac-action')) return;
+      ac.classList.toggle('collapsed');
+    });
+  });
+
+  // ─────────────────────────────────────────────────────
+  // VIEW 2: Spec validation gate
+  // ─────────────────────────────────────────────────────
+
+  const acStates = {
+    'AC-1': 'approved',
+    'AC-2': 'editing',
+    'AC-3': 'pending',
+    'AC-4': 'pending'
+  };
+
+  function stateLabel(state) {
+    if (state === 'approved') return 'Approved';
+    if (state === 'editing')  return 'Editing';
+    return 'Pending review';
+  }
+
+  function updateGate() {
+    const total = Object.keys(acStates).length;
+    const approved = Object.values(acStates).filter(s => s === 'approved').length;
+    const allApproved = approved === total;
+
+    const progressEl = document.querySelector('.spec-foot .progress');
+    const gateMsg    = document.querySelector('.spec-foot .gate-msg');
+    const kickoffBtn = document.querySelector('.spec-foot .btn');
+
+    if (progressEl) {
+      progressEl.innerHTML = '<strong>' + approved + ' of ' + total + ' approved.</strong> ' +
+        (allApproved
+          ? 'All ACs approved — agents are unblocked.'
+          : 'Agents are blocked until every AC is approved or sent back.');
+    }
+    if (gateMsg) {
+      gateMsg.textContent = allApproved ? 'Ready to kick off →' : 'Kickoff disabled →';
+      gateMsg.style.color = allApproved ? 'var(--green-mid)' : 'var(--olive)';
+    }
+    if (kickoffBtn) {
+      kickoffBtn.disabled = !allApproved;
+      if (allApproved) {
+        kickoffBtn.style.opacity = '';
+        kickoffBtn.style.cursor = '';
+        kickoffBtn.classList.add('primary');
+        kickoffBtn.textContent = 'Run /kickoff';
+      } else {
+        kickoffBtn.style.opacity = '0.5';
+        kickoffBtn.style.cursor = 'not-allowed';
+        kickoffBtn.classList.remove('primary');
+        kickoffBtn.textContent = 'Run /kickoff';
+      }
+    }
+  }
+
+  function setACState(acId, state) {
+    acStates[acId] = state;
+    const el = document.querySelector('.verified-ac[data-ac="' + acId + '"]');
+    if (!el) return;
+
+    el.classList.remove('approved', 'editing');
+    if (state !== 'pending') el.classList.add(state);
+
+    const stateBadge = el.querySelector('.verified-ac-state');
+    if (stateBadge) {
+      stateBadge.classList.remove('approved', 'editing', 'pending');
+      stateBadge.classList.add(state);
+      stateBadge.textContent = stateLabel(state);
+    }
+
+    // Show buttons only when editing; hide for approved and pending
+    let actions = el.querySelector('.verified-ac-actions');
+    if (state === 'editing' && !actions) {
+      // Inject action buttons if they don't exist yet
+      actions = document.createElement('div');
+      actions.className = 'verified-ac-actions';
+      actions.innerHTML =
+        '<button class="vac-btn primary" data-action="approve">Approve as-is</button>' +
+        '<button class="vac-btn" data-action="edit">Edit</button>' +
+        '<button class="vac-btn" data-action="sendback">Send back to spec</button>';
+      el.appendChild(actions);
+      wireACActions(el);
+    }
+    if (actions) {
+      actions.style.display = state === 'editing' ? 'flex' : 'none';
+    }
+
+    // Restyle the content for editing/pending
+    const content = el.querySelector('.verified-ac-content');
+    if (content) {
+      if (state === 'pending') {
+        content.style.color = 'var(--gray-600)';
+      } else {
+        content.style.color = '';
+      }
+    }
+
+    updateGate();
+  }
+
+  function wireACActions(el) {
+    el.querySelectorAll('.vac-btn').forEach(btn => {
+      // avoid double-wiring
+      if (btn.dataset.wired) return;
+      btn.dataset.wired = '1';
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const action = btn.dataset.action;
+        const acId = el.dataset.ac;
+        if (action === 'approve')  setACState(acId, 'approved');
+        if (action === 'sendback') setACState(acId, 'pending');
+        if (action === 'edit') {
+          // brief flash to acknowledge — already in editing state
+          el.style.transition = 'box-shadow 0.2s';
+          el.style.boxShadow = '0 0 0 4px rgba(122,107,26,0.20)';
+          setTimeout(() => { el.style.boxShadow = ''; }, 250);
+        }
+      });
+    });
+  }
+
+  // Click on a pending AC body → enter editing
+  document.querySelectorAll('.verified-ac[data-ac]').forEach(el => {
+    wireACActions(el);
+    el.addEventListener('click', (e) => {
+      // don't trigger when clicking a button
+      if (e.target.closest('.vac-btn')) return;
+      const acId = el.dataset.ac;
+      if (acStates[acId] === 'pending') {
+        setACState(acId, 'editing');
+      }
+    });
+  });
+
+  // ─────────────────────────────────────────────────────
+  // VIEW 4: Sprint report destinations + send
+  // ─────────────────────────────────────────────────────
+
+  const sendBtn = document.querySelector('.preview-foot .btn.primary');
+
+  function updateSendButton() {
+    if (!sendBtn || sendBtn.dataset.sent) return;
+    const checked = document.querySelectorAll('.preview-foot .dest-chip.checked').length;
+    if (checked === 0) {
+      sendBtn.textContent = 'Choose at least one destination';
+      sendBtn.disabled = true;
+      sendBtn.style.opacity = '0.5';
+      sendBtn.style.cursor = 'not-allowed';
+    } else {
+      sendBtn.textContent = 'Send to ' + checked + ' destination' + (checked === 1 ? '' : 's');
+      sendBtn.disabled = false;
+      sendBtn.style.opacity = '';
+      sendBtn.style.cursor = '';
+    }
+  }
+
+  document.querySelectorAll('.preview-foot .dest-chip').forEach(chip => {
+    // Skip the "Add destination" chip — it's a different action
+    const text = (chip.textContent || '').trim();
+    if (text.indexOf('Add destination') !== -1) {
+      chip.addEventListener('click', (e) => {
+        e.preventDefault();
+        chip.style.transition = 'border-color 0.2s';
+        chip.style.borderColor = 'var(--green-mid)';
+        setTimeout(() => { chip.style.borderColor = ''; }, 300);
+      });
+      return;
+    }
+    chip.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (sendBtn && sendBtn.dataset.sent) return; // locked after send
+      chip.classList.toggle('checked');
+      const mark = chip.querySelector('.chip-mark');
+      if (mark) mark.textContent = chip.classList.contains('checked') ? '✓' : '+';
+      updateSendButton();
+    });
+  });
+
+  if (sendBtn) {
+    sendBtn.addEventListener('click', () => {
+      if (sendBtn.dataset.sent) return;
+      if (sendBtn.disabled) return;
+      const checked = document.querySelectorAll('.preview-foot .dest-chip.checked').length;
+      if (checked === 0) return;
+
+      sendBtn.dataset.sent = '1';
+      sendBtn.classList.add('sent');
+      sendBtn.textContent = '✓ Sent to ' + checked + ' destination' + (checked === 1 ? '' : 's');
+
+      // Disable the "Save as draft" button to indicate the action is final
+      const saveBtn = document.querySelector('.preview-actions .btn:not(.primary)');
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.style.opacity = '0.5';
+        saveBtn.style.cursor = 'not-allowed';
+      }
+
+      // Lock destination chips
+      document.querySelectorAll('.preview-foot .dest-chip').forEach(chip => {
+        chip.style.cursor = 'default';
+        chip.style.opacity = chip.classList.contains('checked') ? '1' : '0.4';
+      });
+
+      // Advance step indicator: Edit → done, Send → current
+      const steps = document.querySelectorAll('.preview-step-indicator .step');
+      if (steps[1]) {
+        steps[1].classList.remove('current');
+        steps[1].classList.add('done');
+      }
+      if (steps[2]) {
+        steps[2].classList.add('current');
+      }
+
+      // Update the editing-tag on the editing section to "saved"
+      const editingTag = document.querySelector('.preview-section.editing .editing-tag');
+      if (editingTag) {
+        editingTag.textContent = 'Saved';
+        editingTag.style.background = 'var(--green-mid)';
+      }
+      const editingSection = document.querySelector('.preview-section.editing');
+      if (editingSection) editingSection.classList.remove('editing');
+    });
+  }
+
+  // Initialize gate on load (in case anything is out of sync)
+  updateGate();
+
+  // ─────────────────────────────────────────────────────
+  // SIDE NAV: scroll-spy + smooth scroll
+  // ─────────────────────────────────────────────────────
+
+  const navLinks = document.querySelectorAll('.side-nav-link');
+  const sections = Array.from(navLinks)
+    .map(l => document.querySelector(l.getAttribute('href')))
+    .filter(Boolean);
+
+  function updateActive() {
+    if (sections.length === 0) return;
+    let active = sections[0];
+    let activeTop = -Infinity;
+    // Find the section whose top is closest to (but not below) the trigger line
+    const triggerLine = 120; // px from top of viewport
+    for (const section of sections) {
+      const top = section.getBoundingClientRect().top;
+      if (top <= triggerLine && top > activeTop) {
+        active = section;
+        activeTop = top;
+      }
+    }
+    navLinks.forEach(l => {
+      l.classList.toggle('active', l.getAttribute('href') === '#' + active.id);
+    });
+  }
+
+  // Throttle scroll handler with rAF
+  let scrollTicking = false;
+  window.addEventListener('scroll', () => {
+    if (!scrollTicking) {
+      window.requestAnimationFrame(() => {
+        updateActive();
+        scrollTicking = false;
+      });
+      scrollTicking = true;
+    }
+  }, { passive: true });
+
+  window.addEventListener('resize', updateActive, { passive: true });
+  updateActive();
+
+  navLinks.forEach(link => {
+    link.addEventListener('click', e => {
+      const targetId = link.getAttribute('href');
+      const target = document.querySelector(targetId);
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      navLinks.forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+    });
+  });
+
+})();
+</script>
+
+</body>
+</html>
