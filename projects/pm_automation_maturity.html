@@ -321,7 +321,7 @@
   /* ── Metrics ── */
   .metrics-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
   }
   .metric-card {
@@ -613,6 +613,18 @@
         <td class="col-mid">Assembled from closed ADO items; mostly manual with some copying</td>
         <td class="col-then">Auto-generated from acceptance reports at the end of each sprint</td>
       </tr>
+      <tr>
+        <td><strong>Quality visibility</strong></td>
+        <td class="col-now">No signal beyond "tests pass / fail" — hard to know if output is improving or degrading</td>
+        <td class="col-mid">Escape rate and AC pass rate visible per sprint; patterns emerge after several sprints of data</td>
+        <td class="col-then">LLM-as-judge scores tracked over time; baseline-drop alerts surface regressions before the PM sees the acceptance report</td>
+      </tr>
+      <tr>
+        <td><strong>Agent continuity</strong></td>
+        <td class="col-now">Each agent run starts from scratch — no memory of prior attempts within a task</td>
+        <td class="col-mid">Per-task scratchpad persists across loop iterations; agents read prior attempts before retrying, reducing repeated escapes</td>
+        <td class="col-then">Recurring failure patterns are fed back into agent prompts as explicit "known failure modes," closing the loop automatically</td>
+      </tr>
     </tbody>
   </table>
 </section>
@@ -771,7 +783,7 @@
       <div class="time-right">
         <div class="time-heading">Sprint health &amp; stakeholder update</div>
         <ul class="step-list">
-          <li><span class="cmd new">/sprint-report</span> <span>Auto-generated from acceptance reports — fully automated at L4, no gap-filling needed</span></li>
+          <li><span class="cmd new">/sprint-report</span> <span>Auto-generated from acceptance reports — includes quality score trend, cross-agent failure patterns, and cost-per-feature summary. No gap-filling needed at L4.</span></li>
           <li><span class="cmd">/plan-sprints</span> <span>Check remaining backlog vs. agent velocity, adjust priorities</span></li>
         </ul>
       </div>
@@ -884,10 +896,10 @@
       </div>
       <div class="cmd-right">
         <h3>Generate a stakeholder-ready sprint summary</h3>
-        <p>Reads all completed work items and acceptance reports from the sprint window. Produces a plain-English summary of what shipped, what was blocked, and quality health metrics. When escape records use a standardized failure category schema, blocked items are grouped by pattern ("2 auth failures, 1 tool failure") rather than listed individually.</p>
+        <p>Reads all completed work items and acceptance reports from the sprint window. Produces a plain-English summary of what shipped, what was blocked, and quality health metrics. Escape records use a standardized schema (<code style="font-size:0.78rem;">agent_role</code>, <code style="font-size:0.78rem;">failure_category</code>, <code style="font-size:0.78rem;">task_domain</code>) so blocked items are automatically grouped by cross-agent pattern — e.g. "3 auth failures across 2 agents" — rather than listed individually. If the same failure category appears 3 or more times in the sprint window, it is flagged as a recurring pattern requiring a prompt or tooling fix, not just a rerun.</p>
         <div class="cmd-io">
           <div class="io-row"><strong>In:</strong> Sprint window (defaults to last 14 days)</div>
-          <div class="io-row"><strong>Out:</strong> Summary doc + running metrics log</div>
+          <div class="io-row"><strong>Out:</strong> Summary doc + running metrics log + cross-agent failure pattern table</div>
         </div>
       </div>
     </div>
@@ -920,10 +932,10 @@
       </div>
       <div class="cmd-right">
         <h3>Generate an acceptance report for PM review</h3>
-        <p>Uses an LLM-as-judge to evaluate each verified AC against what was built — scores each as pass or fail with evidence. Posts a structured report as an ADO comment so the PM can approve without reviewing the PR.</p>
+        <p>Uses a calibrated LLM-as-judge to evaluate each verified AC against what was built — scores each as pass or fail with evidence on a 1–5 rubric (correctness, completeness, code quality). Posts a structured report as an ADO comment so the PM can approve without reviewing the PR. Scores are logged to a time-series record; if the mean score drops more than 0.3 points below the established baseline, a warning is surfaced before the report is sent.</p>
         <div class="cmd-io">
           <div class="io-row"><strong>In:</strong> Spec file + current branch</div>
-          <div class="io-row"><strong>Out:</strong> Acceptance report in ADO + docs/acceptance/</div>
+          <div class="io-row"><strong>Out:</strong> Acceptance report in ADO + docs/acceptance/ + score appended to evals/results/</div>
         </div>
       </div>
     </div>
@@ -936,7 +948,7 @@
   <div class="section-title">
     <div class="label">How we know we're there</div>
     <h2>Graduation Metrics</h2>
-    <p>L3 thresholds are the immediate target. When we sustain them for two consecutive sprints, we've graduated to L3. L4 thresholds follow once Phase 2 tooling is in place.</p>
+    <p>L3 thresholds are the immediate target. When we sustain them for two consecutive sprints, we've graduated to L3. L4 thresholds follow once Phase 2 tooling is in place. Agent Quality Score and Token Cost Efficiency require eval infrastructure to be operational before they can be tracked.</p>
   </div>
 
   <div class="metrics-grid">
@@ -1005,6 +1017,40 @@
           <div class="metric-bar-label">L4</div>
           <div class="metric-bar-track"><div class="metric-bar-fill" style="width:85%;background:#2d7a3a;"></div></div>
           <div class="metric-bar-value">&gt; 85% critic checks pass</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-name">Agent Quality Score</div>
+      <div class="metric-source">Source: evals/results/ — mean LLM-as-judge score across golden tasks per sprint</div>
+      <div class="metric-bars">
+        <div class="metric-bar-row">
+          <div class="metric-bar-label">L3</div>
+          <div class="metric-bar-track"><div class="metric-bar-fill" style="width:60%;background:#7a6b1a;"></div></div>
+          <div class="metric-bar-value">Baseline established</div>
+        </div>
+        <div class="metric-bar-row">
+          <div class="metric-bar-label">L4</div>
+          <div class="metric-bar-track"><div class="metric-bar-fill" style="width:85%;background:#2d7a3a;"></div></div>
+          <div class="metric-bar-value">No sprint-on-sprint drop &gt; 0.3 pts</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-name">Token Cost Efficiency</div>
+      <div class="metric-source">Source: telemetry/tokens.jsonl — cost per AC pass per sprint</div>
+      <div class="metric-bars">
+        <div class="metric-bar-row">
+          <div class="metric-bar-label">L3</div>
+          <div class="metric-bar-track"><div class="metric-bar-fill" style="width:50%;background:#7a6b1a;"></div></div>
+          <div class="metric-bar-value">Cost per role tracked</div>
+        </div>
+        <div class="metric-bar-row">
+          <div class="metric-bar-label">L4</div>
+          <div class="metric-bar-track"><div class="metric-bar-fill" style="width:80%;background:#2d7a3a;"></div></div>
+          <div class="metric-bar-value">Cost per AC pass trending down</div>
         </div>
       </div>
     </div>
