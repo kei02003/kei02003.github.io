@@ -744,38 +744,6 @@
     border-radius: 2px;
   }
 
-  /* ── Annotation callouts ── */
-  .annotations {
-    max-width: 1320px;
-    margin: 6px auto 32px;
-    padding: 0 24px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
-  .anno {
-    background: #fff;
-    border: 1px dashed var(--gray-300);
-    border-radius: 6px;
-    padding: 10px 14px;
-    font-size: 0.8rem;
-    color: var(--gray-700);
-    line-height: 1.5;
-  }
-  .anno strong { color: var(--gray-900); }
-  .anno .anno-num {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px; height: 18px;
-    background: var(--gray-700);
-    color: #fff;
-    border-radius: 50%;
-    font-size: 0.7rem;
-    font-weight: 700;
-    margin-right: 8px;
-  }
-
   /* ─── Second view: Spec validation ─── */
   .spec-shell {
     max-width: 1320px;
@@ -1338,7 +1306,6 @@
   @media (max-width: 1100px) {
     .cockpit-body { grid-template-columns: 280px 1fr; }
     .rail { display: none; }
-    .annotations { grid-template-columns: 1fr; }
     .spec-body { grid-template-columns: 1fr; }
     .spec-col + .spec-col { border-left: none; border-top: 1px solid var(--gray-200); }
   }
@@ -2484,22 +2451,6 @@
   </div>
 </div>
 
-<!-- Annotations under cockpit -->
-<div class="annotations">
-  <div class="anno">
-    <span class="anno-num">1</span>
-    <strong>Queue, not inbox.</strong> The left rail isn't email — it's a typed queue. Each item knows what command produced it (<span class="mono" style="font-size:0.72rem;">/accept</span>, <span class="mono" style="font-size:0.72rem;">/verify-fix</span>) and what action it's waiting for.
-  </div>
-  <div class="anno">
-    <span class="anno-num">2</span>
-    <strong>Verdicts replace clicking through.</strong> The center pane is the L3→L4 shift: per-AC pass/fail with evidence and a likely-cause hint. The PM never has to open the product to spot-check.
-  </div>
-  <div class="anno">
-    <span class="anno-num">3</span>
-    <strong>Sprint health on every screen.</strong> The right rail keeps the four graduation metrics in peripheral vision so the PM notices drift without having to ask for a report.
-  </div>
-</div>
-
 
 <!-- ───────── VIEW 2: Spec validation ───────── -->
 <div class="view-label" id="view-2">
@@ -2619,22 +2570,6 @@
 
 </div>
 
-<!-- Annotations under spec view -->
-<div class="annotations">
-  <div class="anno">
-    <span class="anno-num">4</span>
-    <strong>The translation is the gate.</strong> Side-by-side keeps the PM's intent visible while they review the verifiable form. Ambiguity gets surfaced (AC-2's "an admin"), not silently resolved by an agent.
-  </div>
-  <div class="anno">
-    <span class="anno-num">5</span>
-    <strong>One AC at a time.</strong> Approve / Edit / Send back. The PM never has to write Gherkin from scratch — they react to a draft, which is faster and produces less drift than authoring.
-  </div>
-  <div class="anno">
-    <span class="anno-num">6</span>
-    <strong>Hard gate, soft cost.</strong> Kickoff is disabled until every AC is approved. Adds maybe 10 minutes to spec time; removes the manual spot-checking that L3 still requires.
-  </div>
-</div>
-
 <!-- ───────── VIEW 3: Contextual button patterns ───────── -->
 <div class="view-label" id="view-3">
   <span class="num">View 3</span>
@@ -2750,23 +2685,6 @@
   </div>
 
 </div>
-
-<!-- Annotations under view 3 -->
-<div class="annotations">
-  <div class="anno">
-    <span class="anno-num">7</span>
-    <strong>The buttons are derived, not configured.</strong> Item type plus state plus available evidence equals action set. Three queue items, three different sets — and the PM never had to learn which command applies when.
-  </div>
-  <div class="anno">
-    <span class="anno-num">8</span>
-    <strong>Slash commands stay underneath.</strong> Every button shows the underlying command in mono — visible affordance for power users and agents, but not the PM's primary path. Like Git → GitHub: composability preserved, friction removed.
-  </div>
-  <div class="anno">
-    <span class="anno-num">9</span>
-    <strong>Disabled states explain themselves.</strong> A button that can't run yet stays visible with the prerequisite spelled out. The PM sees <em>why</em> they can't act, not just an empty space — and so they know what to do to unblock.
-  </div>
-</div>
-
 
 <!-- ───────── VIEW 4: Preview-and-confirm flow ───────── -->
 <div class="view-label" id="view-4">
@@ -2918,22 +2836,6 @@
     </div>
   </div>
 
-</div>
-
-<!-- Annotations under view 4 -->
-<div class="annotations">
-  <div class="anno">
-    <span class="anno-num">10</span>
-    <strong>Generated, then edited.</strong> The escape categories ("2 spec ambiguity, 1 tool failure") come from your standardized failure schema, not free text. The PM only writes the things the auto-draft can't know — like the platform team's quota status.
-  </div>
-  <div class="anno">
-    <span class="anno-num">11</span>
-    <strong>Three steps, one panel.</strong> Generate → Edit → Send is the same flow for every "PM produces something for stakeholders" command — release notes, sprint reports, post-mortems. Same panel shape, different content sources.
-  </div>
-  <div class="anno">
-    <span class="anno-num">12</span>
-    <strong>Destinations are explicit.</strong> Where the report goes is a checkbox decision in front of the PM, not a config buried somewhere. Different sprints want different audiences — and "send to 3 destinations" makes the blast radius unmistakable before they click.
-  </div>
 </div>
 
 <div class="footer">
